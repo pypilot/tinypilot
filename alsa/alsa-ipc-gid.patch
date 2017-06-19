@@ -1,0 +1,12 @@
+diff -Naur usr/local/share/alsa/alsa.conf newusr/local/share/alsa/alsa.conf
+--- usr/local/share/alsa/alsa.conf	2016-05-24 03:34:47.469427839 +0000
++++ newusr/local/share/alsa/alsa.conf	2016-05-24 03:38:19.029427758 +0000
+@@ -73,7 +73,7 @@
+ defaults.pcm.compat 0
+ defaults.pcm.minperiodtime 5000		# in us
+ defaults.pcm.ipc_key 5678293
+-defaults.pcm.ipc_gid audio
++defaults.pcm.ipc_gid staff
+ defaults.pcm.ipc_perm 0660
+ defaults.pcm.dmix.max_periods 0
+ defaults.pcm.dmix.rate 48000

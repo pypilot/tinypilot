@@ -1,0 +1,181 @@
+#!/bin/sh
+#
+######################################################
+# Build script                                       #
+#                                                    #
+# See .info for details                              #
+######################################################
+
+# Export variables needed for compilation
+
+export CFLAGS="-Os -march=armv6zk -mtune=arm1176jzf-s -mfpu=vfp"
+export CXXFLAGS="-Os -march=armv6zk -mtune=arm1176jzf-s -mfpu=vfp"
+
+# Configure it
+
+SRCNAM=gpsd-3.16.tar.gz
+WRKDIR=gpsd-3.16
+EXTNAM=gpsd
+TMPDIR=/tmp/gpsd
+PYTDIR=/usr/local/lib/python2.7/site-packages
+
+######################################################
+# Prepare extension creation                         #
+######################################################
+
+INITIALDIR=$PWD
+
+# Remove dirs and files left from previous creation
+
+#rm -r -f $WRKDIR
+
+rm -r -f $TMPDIR
+
+# Create temporary directory
+
+mkdir -p $TMPDIR/usr/local
+
+######################################################
+# Compile extension                                  #
+######################################################
+
+# Export variables needed for compilation
+
+tar -xf $SRCNAM
+
+# Configure it
+
+cd $WRKDIR
+
+# Compile
+# Install in base temp dir
+
+scons prefix=$TMPDIR/usr/local install
+
+# Delete compilation work directory
+
+cd ..
+rm -rf $WRKDIR
+
+# Adjust directory access rigths
+
+find $TMPDIR/ -type d | xargs chmod -v 755;
+
+# Strip executables
+
+find $TMPDIR | xargs file | grep ELF | cut -f 1 -d : | xargs strip --strip-unneeded
+
+# Move files to doc extension
+
+mkdir -p $TMPDIR-doc/usr/local/share
+mv $TMPDIR/usr/local/share/man $TMPDIR-doc/usr/local/share
+mv $TMPDIR/usr/local/share/info $TMPDIR-doc/usr/local/share
+
+# Move files to dev extension
+
+#mkdir -p $TMPDIR-dev/usr/local/lib
+#mv $TMPDIR/usr/local/lib/*.a $TMPDIR-dev/usr/local/lib
+#mv $TMPDIR/usr/local/lib/*.la $TMPDIR-dev/usr/local/lib
+#mv $TMPDIR/usr/local/lib/pkgconfig $TMPDIR-dev/usr/local/lib
+#mv $TMPDIR/usr/local/include $TMPDIR-dev/usr/local
+
+
+mkdir -p $TMPDIR-python/$PYTDIR
+cp -rv $PYTDIR/gps* $TMPDIR-python/$PYTDIR
+
+# Delete *.pyc files
+
+find $TMPDIR-python/ -name *.pyc | xargs rm -r
+
+# Adjust directory access rigths
+
+find $TMPDIR-python/ -type d | xargs chmod -v 755;
+
+
+###################################################
+# Create base extension in temp dir               #
+###################################################
+
+cd $TMPDIR
+cd ..
+mksquashfs $TMPDIR $EXTNAM.tcz
+cd $TMPDIR
+find usr -not -type d > $EXTNAM.tcz.list
+mv ../$EXTNAM.tcz .
+
+# Create md5 file
+
+md5sum $EXTNAM.tcz > $EXTNAM.tcz.md5.txt
+
+cp -v $EXTNAM.tcz* /mnt/mmcblk0p2/tce/optional
+
+# Cleanup temp directory
+
+rm -rf *
+
+###################################################
+# Create doc extension in temp dir                #
+###################################################
+
+cd $TMPDIR-doc
+cd ..
+mksquashfs $TMPDIR-doc $EXTNAM-doc.tcz
+cd $TMPDIR-doc
+find usr -not -type d > $EXTNAM-doc.tcz.list
+mv ../$EXTNAM-doc.tcz .
+
+# Create md5 file
+
+md5sum $EXTNAM-doc.tcz > $EXTNAM-doc.tcz.md5.txt
+
+cp -v $EXTNAM-doc.tcz* /mnt/mmcblk0p2/tce/optional
+
+# Cleanup temp directory
+
+rm -rf *
+
+###################################################
+# Create dev extension in temp dir                #
+###################################################
+
+#cd $TMPDIR-dev
+#cd ..
+#mksquashfs $TMPDIR-dev $EXTNAM-dev.tcz
+#cd $TMPDIR-dev
+#find usr -not -type d > $EXTNAM-dev.tcz.list
+#mv ../$EXTNAM-dev.tcz .
+
+# Create md5 file
+
+#md5sum $EXTNAM-dev.tcz > $EXTNAM-dev.tcz.md5.txt
+
+#sudo cp -v $EXTNAM-dev.tcz* /mnt/mmcblk0p2/tce/optional
+
+# Cleanup temp directory
+
+#rm -rf *
+
+
+###################################################
+# Create python extension in temp dir               #
+###################################################
+
+cd $TMPDIR-python
+cd ..
+mksquashfs $TMPDIR-python $EXTNAM-python.tcz
+cd $TMPDIR-python
+find usr -not -type d > $EXTNAM-python.tcz.list
+mv ../$EXTNAM-python.tcz .
+
+# Create md5 file
+
+md5sum $EXTNAM-python.tcz > $EXTNAM-python.tcz.md5.txt
+
+cp -v $EXTNAM-python.tcz* /mnt/mmcblk0p2/tce/optional
+
+# Cleanup temp directory
+
+rm -r -f *
+
+cd $INITIALDIR
+

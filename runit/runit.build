@@ -1,0 +1,92 @@
+#!/bin/sh
+#
+######################################################
+# Build script for RPI                               #
+#                                                    #
+# See .info for details                              #
+######################################################
+
+######################################################
+# Configure extension creation parameters            #
+######################################################
+
+SRCNAM=runit-2.1.2.tar.gz
+WRKDIR=admin
+EXTNAM=runit
+TMPDIR=/tmp/runit
+
+DESTDIR=$TMPDIR/usr/local/bin
+
+######################################################
+# Prepare extension creation                         #
+######################################################
+
+INITIALDIR=$PWD
+
+# Remove dirs and files left from previous creation
+
+rm -rf $WRKDIR
+rm -rf $TMPDIR
+
+# Create temporary directory
+
+mkdir -p $DESTDIR
+
+######################################################
+# Compile extension                                  #
+######################################################
+
+# Export variables needed for compilation
+
+export CFLAGS="-Os -march=armv6zk -mtune=arm1176jzf-s -mfpu=vfp"
+export CXXFLAGS="-Os -march=armv6zk -mtune=arm1176jzf-s -mfpu=vfp"
+#export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/usr/lib/pkgconfig
+
+# Unpack source in current directory
+
+tar -xf $SRCNAM
+
+# Configure it
+
+cd $WRKDIR/runit-2.1.2/src
+
+# Compile
+
+make
+
+cp -v sv runsvdir runsv svlogd chpst $DESTDIR
+cd ../../..
+
+rm -r -f $WRKDIR
+
+# Adjust directory access rigths
+
+find $TMPDIR/ -type d | xargs chmod -v 755;
+
+# Strip executables
+
+find $TMPDIR | xargs file | grep ELF | cut -f 1 -d : | xargs strip --strip-unneeded
+
+###################################################
+# Create base extension in temp dir               #
+###################################################
+
+cd $TMPDIR
+cd ..
+mksquashfs $TMPDIR $EXTNAM.tcz
+cd $TMPDIR
+find usr -not -type d > $EXTNAM.tcz.list
+mv ../$EXTNAM.tcz .
+
+# Create md5 file
+
+md5sum $EXTNAM.tcz > $EXTNAM.tcz.md5.txt
+
+
+sudo cp -v $EXTNAM.tcz* /mnt/mmcblk0p2/tce/optional
+
+# Cleanup temp directory
+
+rm -rf *
+
+cd $INITIALDIR

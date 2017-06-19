@@ -1,0 +1,88 @@
+#!/bin/sh
+#
+######################################################
+# Build script for RPI                               #
+#                                                    #
+# See .info for details                              #
+#                                                    #
+# February 13, 2013                                  #
+######################################################
+
+######################################################
+# Configure extension creation parameters            #
+######################################################
+
+SRCNAM=RTIMULib2.tar.gz
+WRKDIR=RTIMULib
+EXTNAM=python-RTIMULib
+TMPDIR=/tmp/$EXTNAM
+PYTDIR=/usr/local/lib/python2.7/site-packages
+
+######################################################
+# Prepare extension creation                         #
+######################################################
+
+INITIALDIR=$PWD
+
+# Remove dirs and files left from previous creation
+
+#rm -r -f $PYTDIR/$WRKDIR*.egg
+
+# Create temporary directory
+
+mkdir -p $TMPDIR/$PYTDIR
+
+######################################################
+# Compile extension                                  #
+######################################################
+
+# Export variables needed for compilation
+
+export CFLAGS="-march=armv6zk -mtune=arm1176jzf-s -mfpu=vfp"
+export CXXFLAGS="-march=armv6zk -mtune=arm1176jzf-s -mfpu=vfp"
+
+# Unpack source in current directory
+
+tar -xf $SRCNAM
+mv RTIMULib2 RTIMULib
+
+# Configure it
+
+cd $WRKDIR/Linux/python
+
+# Build and Install
+
+python setup.py bdist
+tar xvf dist/*tar.gz -C $TMPDIR
+
+# Delete compilation work directory
+
+cd ../../..
+rm -r -f $WRKDIR
+
+# Adjust directory access rigths
+
+find $TMPDIR/ -type d | xargs chmod -v 755;
+
+###################################################
+# Create base extension in temp dir               #
+###################################################
+
+cd $TMPDIR
+cd ..
+mksquashfs $TMPDIR $EXTNAM.tcz
+cd $TMPDIR
+find usr -not -type d > $EXTNAM.tcz.list
+mv ../$EXTNAM.tcz .
+
+# Create md5 file
+
+md5sum $EXTNAM.tcz > $EXTNAM.tcz.md5.txt
+
+sudo cp -fv $EXTNAM.tcz* /mnt/mmcblk0p2/tce/optional
+
+# Cleanup temp directory
+
+rm -rf *
+
+cd $INITIALDIR

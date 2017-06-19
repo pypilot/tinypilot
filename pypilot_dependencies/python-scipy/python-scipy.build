@@ -1,0 +1,105 @@
+#!/bin/sh
+#
+######################################################
+# Build script for RPI                               #
+#                                                    #
+# See .info for details                              #
+#                                                    #
+# February 13, 2013                                  #
+######################################################
+
+######################################################
+# Configure extension creation parameters            #
+######################################################
+
+SRCNAM=scipy-0.18.1.tar.gz
+WRKDIR=scipy-0.18.1
+EXTNAM=python-scipy
+TMPDIR=/tmp/python-scipy
+PYTDIR=/usr/local/lib/python2.7/site-packages
+
+######################################################
+# Prepare extension creation                         #
+######################################################
+
+# Create temporary directory
+
+mkdir -p $TMPDIR/$PYTDIR
+
+######################################################
+# Compile extension                                  #
+######################################################
+
+INITIALDIR=$PWD
+
+# Export variables needed for compilation
+
+export CFLAGS="-Os -pipe"
+export CXXFLAGS="-Os -pipe -fno-exceptions -fno-rtti"
+export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/usr/lib/pkgconfig
+
+if [ -e $PYTDIR/easy-install.pth ]; then
+	echo 'please remove the file:'
+	echo $PYTDIR/easy-install.pth
+fi
+
+# Unpack source in current directory
+
+#tar -xf $SRCNAM
+
+# Configure it
+
+cd $WRKDIR
+
+# Install in place
+
+sudo python setup.py install
+
+# Delete compilation work directory
+
+cd ..
+#rm -rf $WRKDIR
+
+# Move files to tmp dir
+
+mkdir -p $TMPDIR/$PYTDIR
+cp -r $PYTDIR/scipy* $TMPDIR/$PYTDIR
+cp $PYTDIR/easy-install.pth $TMPDIR/$PYTDIR/scipy.pth
+
+# Delete *.pyc files
+
+find $TMPDIR/ -name *.pyc | xargs rm -r
+
+# Adjust directory access rigths
+
+find $TMPDIR/ -type d | xargs chmod -v 755;
+
+# Strip executables
+
+find $TMPDIR | xargs file | grep ELF | cut -f 1 -d : | xargs strip --strip-unneeded
+
+###################################################
+# Create base extension in temp dir               #
+###################################################
+
+cd $TMPDIR
+cd ..
+mksquashfs $TMPDIR $EXTNAM.tcz
+cd $TMPDIR
+find usr -not -type d > $EXTNAM.tcz.list
+mv ../$EXTNAM.tcz .
+
+# Create md5 file
+
+md5sum $EXTNAM.tcz > $EXTNAM.tcz.md5.txt
+
+cp -fv $EXTNAM.tcz* /mnt/mmcblk0p2/tce/optional
+
+# Cleanup temp directory
+
+rm -rf *
+
+cd $INITIALDIR
+
+sudo cp -fv $EXTNAM.tcz* /mnt/mmcblk0p2/tce/optional
+

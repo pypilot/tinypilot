@@ -1,0 +1,86 @@
+#!/bin/sh
+#
+######################################################
+# Build script                                       #
+#                                                    #
+# See .info for details                              #
+######################################################
+
+######################################################
+# Configure extension creation parameters            #
+######################################################
+
+SRCNAM=lapack-3.1.1.tgz
+WRKDIR=lapack-3.1.1
+EXTNAM=lapack
+TMPDIR=/tmp/lapack
+
+######################################################
+# Prepare extension creation                         #
+######################################################
+
+# Remove dirs and files left from previous creation
+
+rm -r -f $WRKDIR
+
+rm -r -f $TMPDIR
+
+# Create temporary directory
+
+mkdir -p $TMPDIR
+
+######################################################
+# Compile extension                                  #
+######################################################
+
+INITIALDIR=$PWD
+
+# Export variables needed for compilation
+
+tar -xf $SRCNAM
+
+# Configure it
+
+cd $WRKDIR
+cp INSTALL/make.inc.gfortran make.inc
+
+# Compile
+
+make
+
+# Install in base temp dir
+
+mkdir -p $TMPDIR/usr/lib
+cp lapack*.a $TMPDIR/usr/lib/liblapack.a
+
+# Delete compilation work directory
+
+cd ..
+rm -r -f $WRKDIR
+
+# Adjust directory access rigths
+
+find $TMPDIR/ -type d | xargs chmod -v 755;
+
+# Strip executables
+
+find $TMPDIR | xargs file | grep ELF | cut -f 1 -d : | xargs strip --strip-unneeded
+
+###################################################
+# Create base extension in temp dir               #
+###################################################
+
+cd $TMPDIR
+cd ..
+mksquashfs $TMPDIR $EXTNAM.tcz
+cd $TMPDIR
+find usr -not -type d > $EXTNAM.tcz.list
+mv ../$EXTNAM.tcz .
+
+# Create md5 file
+
+md5sum $EXTNAM.tcz > $EXTNAM.tcz.md5.txt
+
+cp -fv $EXTNAM.tcz /mnt/mmcblk0p2/tce/optional
+
+cd $INITIALDIR

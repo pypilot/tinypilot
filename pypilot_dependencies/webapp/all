@@ -1,0 +1,4 @@
+for i in `cat * | grep ^NAM= | sed s,NAM=,,g`; do
+	echo python-$i
+	tce-load -i python-$i
+	done

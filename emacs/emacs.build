@@ -1,0 +1,91 @@
+#!/bin/sh
+#
+######################################################
+# Build script                                       #
+#                                                    #
+# See .info for details                              #
+######################################################
+
+# Export variables needed for compilation
+
+export CFLAGS="-Os -march=armv6zk -mtune=arm1176jzf-s -mfpu=vfp"
+export CXXFLAGS="-Os -march=armv6zk -mtune=arm1176jzf-s -mfpu=vfp"
+
+# Configure it
+
+SRCNAM=emacs.tar.xz
+WRKDIR=emacs
+EXTNAM=emacs
+TMPDIR=/tmp/emacs
+
+######################################################
+# Prepare extension creation                         #
+######################################################
+
+INITIALDIR=$PWD
+
+# Remove dirs and files left from previous creation
+
+#rm -r -f $WRKDIR
+rm -r -f $TMPDIR
+
+# Create temporary directory
+
+mkdir -p $TMPDIR
+
+######################################################
+# Compile extension                                  #
+######################################################
+
+# Export variables needed for compilation
+
+tar -xf $SRCNAM
+
+# Configure it
+
+cd $WRKDIR
+
+./configure --without-all
+
+# Compile
+
+make
+
+# Install in base temp dir
+
+make DESTDIR=$TMPDIR install
+
+# Delete compilation work directory
+
+cd ..
+rm -r -f $WRKDIR
+
+# Adjust directory access rigths
+find $TMPDIR/ -type d | xargs chmod -v 755;
+
+# Strip executables
+
+find $TMPDIR | xargs file | grep ELF | cut -f 1 -d : | xargs strip --strip-unneeded
+
+###################################################
+# Create base extension in temp dir               #
+###################################################
+
+cd $TMPDIR
+cd ..
+mksquashfs $TMPDIR $EXTNAM.tcz
+cd $TMPDIR
+find usr -not -type d > $EXTNAM.tcz.list
+mv ../$EXTNAM.tcz .
+
+# Create md5 file
+
+md5sum $EXTNAM.tcz > $EXTNAM.tcz.md5.txt
+
+sudo cp -v $EXTNAM.tcz* /mnt/mmcblk0p2/tce/optional
+
+# Cleanup temp directory
+
+rm -rf *
+
+cd $INITIALDIR
