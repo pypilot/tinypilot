@@ -12,36 +12,37 @@
 # Configure extension creation parameters            #
 ######################################################
 
+PYTHON=`cat /opt/python`
 
-SRCNAM=wiringPi.tar.gz
-WRKDIR=wiringPi
-EXTNAM=wiringPi
-
-TMPDIR=/tmp/$EXTNAM
+SRCNAM=pyudev-git160618.tar.gz
+WRKDIR=pyudev
+EXTNAM=$PYTHON-pyudev
+TMPDIR=/tmp/$PYTHON-pyudev
+PYTDIR=/usr/local/lib/$PYTHON/site-packages
 
 ######################################################
 # Prepare extension creation                         #
 ######################################################
 
-INITIALDIR=$PWD
-
 # Remove dirs and files left from previous creation
 
-#rm -r -f $PYTDIR/$WRKDIR*.egg
+rm -r -f $PYTDIR/$EXTNAM*.egg
 
 # Create temporary directory
 
-rm -r -f $TMPDIR
-mkdir -p $TMPDIR/lib
+mkdir -p $TMPDIR/$PYTDIR
 
 ######################################################
 # Compile extension                                  #
 ######################################################
 
+INITIALDIR=$PWD
+
 # Export variables needed for compilation
 
-export CFLAGS="-march=armv6zk -mtune=arm1176jzf-s -mfpu=vfp"
-export CXXFLAGS="-march=armv6zk -mtune=arm1176jzf-s -mfpu=vfp"
+export CFLAGS="-Os -pipe"
+export CXXFLAGS="-Os -pipe -fno-exceptions -fno-rtti"
+export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/usr/lib/pkgconfig
 
 # Unpack source in current directory
 
@@ -49,18 +50,16 @@ tar -xf $SRCNAM
 
 # Configure it
 
-# Build and Install
 cd $WRKDIR
 
-cd wiringPi
-make DESTDIR=$TMPDIR install
-cd ../devLib
-make DESTDIR=$TMPDIR install
+# Install in place
 
-cd ../gpio
-make DESTDIR=$TMPDIR install
+sudo $PYTHON setup.py bdist
+tar xvf dist/*tar.gz -C $TMPDIR
 
-cd ../..
+# Delete compilation work directory
+
+cd ..
 rm -r -f $WRKDIR
 
 # Adjust directory access rigths
@@ -82,7 +81,7 @@ mv ../$EXTNAM.tcz .
 
 md5sum $EXTNAM.tcz > $EXTNAM.tcz.md5.txt
 
-sudo cp -fv $EXTNAM.tcz* /mnt/mmcblk0p2/tce/optional
+cp -fv $EXTNAM.tcz* /mnt/mmcblk0p2/tce/optional
 
 # Cleanup temp directory
 

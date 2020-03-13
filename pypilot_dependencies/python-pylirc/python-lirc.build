@@ -5,44 +5,68 @@
 #                                                    #
 # See .info for details                              #
 #                                                    #
+# February 13, 2013                                  #
 ######################################################
 
 ######################################################
 # Configure extension creation parameters            #
 ######################################################
 
-PYNAM=pkg_resources
-NAM=pkg_resources
+WRKDIR=pylirc2-0.1
+SRCNAM=$WRKDIR.tar.gz
+PYTHON=`cat /opt/python`
+EXTNAM=$PYTHON-numpy
+TMPDIR=/tmp/$PYTHON-numpy
+PYTDIR=/usr/local/lib/$PYTHON/site-packages
 
-EXTNAM=python-$NAM
-TMPDIR=/tmp/python-$NAM
-PYTDIR=/usr/local/lib/python2.7/site-packages
+wget -c https://files.pythonhosted.org/packages/a9/e1/a19ed9cac5353ec07294be7b1aefc8f89985987b356e916e2c39b5b03d9a/pylirc2-0.1.tar.gz
+
 
 ######################################################
 # Prepare extension creation                         #
 ######################################################
 
-INITIALDIR=$PWD
-
 # Remove dirs and files left from previous creation
 
-#sudo pip uninstall Flask
+rm -r -f $PYTDIR/$EXTNAM*.egg
 
 # Create temporary directory
 
-mkdir -p $TMPDIR$PYTDIR
+mkdir -p $TMPDIR/$PYTDIR
 
 ######################################################
 # Compile extension                                  #
 ######################################################
 
+INITIALDIR=$PWD
+
+# Export variables needed for compilation
+
+export CFLAGS="-Os -pipe"
+export CXXFLAGS="-Os -pipe -fno-exceptions -fno-rtti"
+export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/usr/lib/pkgconfig
+
+# Unpack source in current directory
+
+tar -xf $SRCNAM
+
+# Configure it
+
+cd $WRKDIR
+
 # Install in place
 
-#sudo pip install $PYNAM
+sudo $PYTHON setup.py install
+
+# Delete compilation work directory
+
+cd ..
+rm -rf $WRKDIR
 
 # Move files to tmp dir
 
-cp -rf $PYTDIR/$PYNAM-*-info $PYTDIR/$NAM $PYTDIR/$NAM*py $TMPDIR$PYTDIR
+mkdir -p $TMPDIR/$PYTDIR
+cp -r $PYTDIR/pylirc*  $TMPDIR/$PYTDIR
 
 # Delete *.pyc files
 
@@ -52,8 +76,9 @@ find $TMPDIR/ -name *.pyc | xargs rm -r
 
 find $TMPDIR/ -type d | xargs chmod -v 755;
 
-find $TMPDIR | xargs file | grep ELF | cut -f 1 -d : | xargs strip --strip-unneeded
+# Strip executables
 
+find $TMPDIR | xargs file | grep ELF | cut -f 1 -d : | xargs strip --strip-unneeded
 
 ###################################################
 # Create base extension in temp dir               #
@@ -64,14 +89,13 @@ cd ..
 mksquashfs $TMPDIR $EXTNAM.tcz
 cd $TMPDIR
 find usr -not -type d > $EXTNAM.tcz.list
-mv -f ../$EXTNAM.tcz .
+mv ../$EXTNAM.tcz .
 
 # Create md5 file
 
 md5sum $EXTNAM.tcz > $EXTNAM.tcz.md5.txt
 
-# copy extension files
-cp $EXTNAM.tcz* /mnt/mmcblk0p2/tce/optional
+cp -fv $EXTNAM.tcz* /mnt/mmcblk0p2/tce/optional
 
 # Cleanup temp directory
 

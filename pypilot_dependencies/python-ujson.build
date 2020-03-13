@@ -11,8 +11,8 @@
 # Configure extension creation parameters            #
 ######################################################
 
-PYNAM=gevent
-NAM=gevent
+PYNAM=ujson
+NAM=ujson
 
 PYTHON=`cat /opt/python`
 EXTNAM=$PYTHON-$NAM
@@ -27,7 +27,7 @@ INITIALDIR=$PWD
 
 # Remove dirs and files left from previous creation
 
-#sudo pip3.6 uninstall Flask
+#sudo pip uninstall Flask
 
 # Create temporary directory
 

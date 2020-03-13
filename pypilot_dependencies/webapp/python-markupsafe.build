@@ -14,9 +14,10 @@
 PYNAM=MarkupSafe
 NAM=markupsafe
 
-EXTNAM=python-$NAM
-TMPDIR=/tmp/python-$NAM
-PYTDIR=/usr/local/lib/python2.7/site-packages
+PYTHON=`cat /opt/python`
+EXTNAM=$PYTHON-$NAM
+TMPDIR=/tmp/$PYTHON-$NAM
+PYTDIR=/usr/local/lib/$PYTHON/site-packages
 
 ######################################################
 # Prepare extension creation                         #
@@ -26,7 +27,7 @@ INITIALDIR=$PWD
 
 # Remove dirs and files left from previous creation
 
-#sudo pip uninstall Flask
+#sudo pip3.6 uninstall Flask
 
 # Create temporary directory
 
@@ -38,7 +39,7 @@ mkdir -p $TMPDIR$PYTDIR
 
 # Install in place
 
-sudo pip install $PYNAM
+sudo pip3.6 install $PYNAM
 
 # Move files to tmp dir
 

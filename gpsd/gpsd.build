@@ -8,16 +8,18 @@
 
 # Export variables needed for compilation
 
-export CFLAGS="-Os -march=armv6zk -mtune=arm1176jzf-s -mfpu=vfp"
-export CXXFLAGS="-Os -march=armv6zk -mtune=arm1176jzf-s -mfpu=vfp"
+
+PYTHON=`cat /opt/python`
 
 # Configure it
 
-SRCNAM=gpsd-3.16.tar.gz
-WRKDIR=gpsd-3.16
+WRKDIR=gpsd-3.20
+SRCNAM=$WRKDIR.tar.xz
 EXTNAM=gpsd
-TMPDIR=/tmp/gpsd
-PYTDIR=/usr/local/lib/python2.7/site-packages
+TMPDIR=/tmp
+PYTDIR=/usr/local/lib/$PYTHON/site-packages
+
+wget -c http://download-mirror.savannah.gnu.org/releases/gpsd/$SRCNAM
 
 ######################################################
 # Prepare extension creation                         #
@@ -29,11 +31,11 @@ INITIALDIR=$PWD
 
 #rm -r -f $WRKDIR
 
-rm -r -f $TMPDIR
+rm -r -f $TMPDIR/$EXTNAM
 
 # Create temporary directory
 
-mkdir -p $TMPDIR/usr/local
+mkdir -p $TMPDIR/$EXTNAM/usr/local
 
 ######################################################
 # Compile extension                                  #
@@ -44,13 +46,16 @@ mkdir -p $TMPDIR/usr/local
 tar -xf $SRCNAM
 
 # Configure it
+export CFLAGS="-Os -march=armv6zk -mtune=arm1176jzf-s -mfpu=vfp"
+export CXXFLAGS="-Os -march=armv6zk -mtune=arm1176jzf-s -mfpu=vfp"
 
 cd $WRKDIR
 
 # Compile
 # Install in base temp dir
-
-scons prefix=$TMPDIR/usr/local install
+ln -s  `which $PYTHON` python
+PATH=.:$PATH
+sudo scons prefix=$TMPDIR/$EXTNAM/usr/local install
 
 # Delete compilation work directory
 
@@ -58,48 +63,47 @@ cd ..
 rm -rf $WRKDIR
 
 # Adjust directory access rigths
-
-find $TMPDIR/ -type d | xargs chmod -v 755;
+sudo chown -R tc /tmp/$TMPDIR/$EXTNAM
+find $TMPDIR/$EXTNAM/ -type d | xargs chmod -v 755;
 
 # Strip executables
-
-find $TMPDIR | xargs file | grep ELF | cut -f 1 -d : | xargs strip --strip-unneeded
+find $TMPDIR/$EXTNAM | xargs file | grep ELF | cut -f 1 -d : | xargs strip --strip-unneeded
 
 # Move files to doc extension
 
-mkdir -p $TMPDIR-doc/usr/local/share
-mv $TMPDIR/usr/local/share/man $TMPDIR-doc/usr/local/share
-mv $TMPDIR/usr/local/share/info $TMPDIR-doc/usr/local/share
+mkdir -p $TMPDIR/$EXTNAM-doc/usr/local/share
+mv $TMPDIR/$EXTNAM/usr/local/share/man $TMPDIR/$EXTNAM-doc/usr/local/share
+mv $TMPDIR/$EXTNAM/usr/local/share/info $TMPDIR/$EXTNAM-doc/usr/local/share
 
 # Move files to dev extension
 
-#mkdir -p $TMPDIR-dev/usr/local/lib
-#mv $TMPDIR/usr/local/lib/*.a $TMPDIR-dev/usr/local/lib
-#mv $TMPDIR/usr/local/lib/*.la $TMPDIR-dev/usr/local/lib
-#mv $TMPDIR/usr/local/lib/pkgconfig $TMPDIR-dev/usr/local/lib
-#mv $TMPDIR/usr/local/include $TMPDIR-dev/usr/local
+#mkdir -p $TMPDIR/$EXTNAM-dev/usr/local/lib
+#mv $TMPDIR/$EXTNAM/usr/local/lib/*.a $TMPDIR/$EXTNAM-dev/usr/local/lib
+#mv $TMPDIR/$EXTNAM/usr/local/lib/*.la $TMPDIR/$EXTNAM-dev/usr/local/lib
+#mv $TMPDIR/$EXTNAM/usr/local/lib/pkgconfig $TMPDIR/$EXTNAM-dev/usr/local/lib
+#mv $TMPDIR/$EXTNAM/usr/local/include $TMPDIR/$EXTNAM-dev/usr/local
 
 
-mkdir -p $TMPDIR-python/$PYTDIR
-cp -rv $PYTDIR/gps* $TMPDIR-python/$PYTDIR
+mkdir -p $TMPDIR/$PYTHON-$EXTNAM/$PYTDIR
+cp -rv $PYTDIR/gps* $TMPDIR/$PYTHON-$EXTNAM/$PYTDIR
 
 # Delete *.pyc files
 
-find $TMPDIR-python/ -name *.pyc | xargs rm -r
+find $TMPDIR/$PYTHON-$EXTNAM -name *.pyc | xargs rm -r
 
 # Adjust directory access rigths
 
-find $TMPDIR-python/ -type d | xargs chmod -v 755;
+find $PYTHON-$TMPDIR/$PYTHON-$EXTNAM -type d | xargs chmod -v 755;
 
 
 ###################################################
 # Create base extension in temp dir               #
 ###################################################
 
-cd $TMPDIR
+cd $TMPDIR/$EXTNAM
 cd ..
-mksquashfs $TMPDIR $EXTNAM.tcz
-cd $TMPDIR
+mksquashfs $TMPDIR/$EXTNAM $EXTNAM.tcz
+cd $TMPDIR/$EXTNAM
 find usr -not -type d > $EXTNAM.tcz.list
 mv ../$EXTNAM.tcz .
 
@@ -117,10 +121,10 @@ rm -rf *
 # Create doc extension in temp dir                #
 ###################################################
 
-cd $TMPDIR-doc
+cd $TMPDIR/$EXTNAM-doc
 cd ..
-mksquashfs $TMPDIR-doc $EXTNAM-doc.tcz
-cd $TMPDIR-doc
+mksquashfs $TMPDIR/$EXTNAM-doc $EXTNAM-doc.tcz
+cd $TMPDIR/$EXTNAM-doc
 find usr -not -type d > $EXTNAM-doc.tcz.list
 mv ../$EXTNAM-doc.tcz .
 
@@ -138,10 +142,10 @@ rm -rf *
 # Create dev extension in temp dir                #
 ###################################################
 
-#cd $TMPDIR-dev
+#cd $TMPDIR/$EXTNAM-dev
 #cd ..
-#mksquashfs $TMPDIR-dev $EXTNAM-dev.tcz
-#cd $TMPDIR-dev
+#mksquashfs $TMPDIR/$EXTNAM-dev $EXTNAM-dev.tcz
+#cd $TMPDIR/$EXTNAM-dev
 #find usr -not -type d > $EXTNAM-dev.tcz.list
 #mv ../$EXTNAM-dev.tcz .
 
@@ -160,18 +164,18 @@ rm -rf *
 # Create python extension in temp dir               #
 ###################################################
 
-cd $TMPDIR-python
+cd $TMPDIR/$PYTHON-$EXTNAM
 cd ..
-mksquashfs $TMPDIR-python $EXTNAM-python.tcz
-cd $TMPDIR-python
-find usr -not -type d > $EXTNAM-python.tcz.list
-mv ../$EXTNAM-python.tcz .
+mksquashfs $TMPDIR/$PYTHON-$EXTNAM $PYTHON-$EXTNAM.tcz
+cd $TMPDIR/$PYTHON-$EXTNAM
+find usr -not -type d > $PYTHON-$EXTNAM.tcz.list
+mv ../$PYTHON-$EXTNAM.tcz .
 
 # Create md5 file
 
-md5sum $EXTNAM-python.tcz > $EXTNAM-python.tcz.md5.txt
+md5sum $PYTHON-$EXTNAM.tcz > $PYTHON-$EXTNAM.tcz.md5.txt
 
-cp -v $EXTNAM-python.tcz* /mnt/mmcblk0p2/tce/optional
+cp -v $PYTHON-$EXTNAM.tcz* /mnt/mmcblk0p2/tce/optional
 
 # Cleanup temp directory
 

@@ -12,11 +12,15 @@
 # Configure extension creation parameters            #
 ######################################################
 
-SRCNAM=numpy-1.12.0b1.tar.gz
-WRKDIR=numpy-1.12.0b1
-EXTNAM=python-numpy
-TMPDIR=/tmp/python-numpy
-PYTDIR=/usr/local/lib/python2.7/site-packages
+WRKDIR=numpy-1.18.1
+SRCNAM=$WRKDIR.tar.gz
+PYTHON=`cat /opt/python`
+EXTNAM=$PYTHON-numpy
+TMPDIR=/tmp/$PYTHON-numpy
+PYTDIR=/usr/local/lib/$PYTHON/site-packages
+
+wget -c https://github.com/numpy/numpy/releases/download/v1.18.1/numpy-1.18.1.tar.gz
+#wget -c https://github.com/numpy/numpy/releases/download/v1.12.0rc2/numpy-1.12.0rc2.tar.gz
 
 ######################################################
 # Prepare extension creation                         #
@@ -52,7 +56,7 @@ cd $WRKDIR
 
 # Install in place
 
-sudo python setup.py install
+sudo $PYTHON setup.py install
 
 # Delete compilation work directory
 

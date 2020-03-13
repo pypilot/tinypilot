@@ -12,11 +12,13 @@
 # Configure extension creation parameters            #
 ######################################################
 
-SRCNAM=RPi.GPIO-0.6.3.tar.gz
-WRKDIR=RPi.GPIO-0.6.3
-EXTNAM=python-RPi.GPIO
-TMPDIR=/tmp/python-RPi.GPIO
-PYTDIR=/usr/local/lib/python2.7/site-packages
+PYTHON=`cat /opt/python`
+
+SRCNAM=spidev-3.4.tar.gz
+WRKDIR=spidev-3.4
+EXTNAM=$PYTHON-spidev
+TMPDIR=/tmp/$PYTHON-spidev
+PYTDIR=/usr/local/lib/$PYTHON/site-packages
 
 ######################################################
 # Prepare extension creation                         #
@@ -52,29 +54,17 @@ cd $WRKDIR
 
 # Install in place
 
-sudo python setup.py install
+sudo $PYTHON setup.py bdist
+tar xvf dist/*tar.gz -C $TMPDIR
 
 # Delete compilation work directory
 
 cd ..
-sudo rm -rf $WRKDIR
-
-# Move files to tmp dir
-
-mkdir -p $TMPDIR/$PYTDIR
-cp -rv $PYTDIR/RPi* $TMPDIR/$PYTDIR
-
-# Delete *.pyc files
-
-find $TMPDIR/ -name *.pyc | xargs rm -r
+rm -r -f $WRKDIR
 
 # Adjust directory access rigths
 
 find $TMPDIR/ -type d | xargs chmod -v 755;
-
-# Strip executables
-
-find $TMPDIR | xargs file | grep ELF | cut -f 1 -d : | xargs strip --strip-unneeded
 
 ###################################################
 # Create base extension in temp dir               #

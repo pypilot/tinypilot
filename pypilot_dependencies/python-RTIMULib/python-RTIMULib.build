@@ -14,9 +14,11 @@
 
 SRCNAM=RTIMULib2.tar.gz
 WRKDIR=RTIMULib
-EXTNAM=python-RTIMULib
+
+PYTHON=`cat /opt/python`
+EXTNAM=$PYTHON-RTIMULib
 TMPDIR=/tmp/$EXTNAM
-PYTDIR=/usr/local/lib/python2.7/site-packages
+PYTDIR=/usr/local/lib/$PYTHON/site-packages
 
 ######################################################
 # Prepare extension creation                         #
@@ -43,7 +45,7 @@ export CXXFLAGS="-march=armv6zk -mtune=arm1176jzf-s -mfpu=vfp"
 
 # Unpack source in current directory
 
-tar -xf $SRCNAM
+#tar -xf $SRCNAM
 mv RTIMULib2 RTIMULib
 
 # Configure it
@@ -52,7 +54,7 @@ cd $WRKDIR/Linux/python
 
 # Build and Install
 
-python setup.py bdist
+$PYTHON setup.py bdist
 tar xvf dist/*tar.gz -C $TMPDIR
 
 # Delete compilation work directory
