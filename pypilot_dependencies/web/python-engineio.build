@@ -14,7 +14,7 @@
 PYNAM=python_engineio
 NAM=engineio
 
-PYTHON=`cat /opt/python`
+PYTHON=python`cat /opt/python`
 EXTNAM=$PYTHON-$NAM
 TMPDIR=/tmp/$PYTHON-$NAM
 PYTDIR=/usr/local/lib/$PYTHON/site-packages
@@ -39,7 +39,8 @@ mkdir -p $TMPDIR$PYTDIR
 
 # Install in place
 
-sudo pip3.6 install $PYNAM
+#sudo pip3.6 install $PYNAM
+sudo pip3.6 install $PYNAM*
 
 # Move files to tmp dir
 

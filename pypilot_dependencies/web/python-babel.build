@@ -11,8 +11,8 @@
 # Configure extension creation parameters            #
 ######################################################
 
-PYNAM=socketio
-NAM=socketio
+PYNAM=Babel
+NAM=babel
 
 PYTHON=python`cat /opt/python`
 EXTNAM=$PYTHON-$NAM
@@ -40,11 +40,15 @@ mkdir -p $TMPDIR$PYTDIR
 # Install in place
 
 #sudo pip3.6 install $PYNAM
-sudo pip3.6 install python_socketio-5.3.0-py2.py3-none-any.whl
+sudo pip3.6 install pytz*whl
+sudo pip3.6 install $PYNAM*whl
+sudo pip3.6 install Flask_$PYNAM*whl
 
 # Move files to tmp dir
 
-cp -rf $PYTDIR/$PYNAM-*-info $PYTDIR/$NAM $PYTDIR/$NAM*py $TMPDIR$PYTDIR
+cp -rf $PYTDIR/pytz-*-info $PYTDIR/pytz $TMPDIR$PYTDIR
+cp -rf $PYTDIR/$PYNAM-*-info $PYTDIR/$NAM $TMPDIR$PYTDIR
+cp -rf $PYTDIR/Flask_$PYNAM-*-info $PYTDIR/flask_$NAM $TMPDIR$PYTDIR
 
 # Delete *.pyc files
 
@@ -55,6 +59,12 @@ find $TMPDIR/ -name *.pyc | xargs rm -r
 find $TMPDIR/ -type d | xargs chmod -v 755;
 
 find $TMPDIR | xargs file | grep ELF | cut -f 1 -d : | xargs strip --strip-unneeded
+
+rm -r $TMPDIR/usr/local/lib/$PYTHON/site-packages/babel/locale-data
+
+# NOTE
+# I made all locale-data dat files empty
+# for i in *; do touch ../locale-data/$i; done
 
 
 ###################################################
