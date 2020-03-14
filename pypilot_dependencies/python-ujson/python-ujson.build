@@ -12,8 +12,8 @@
 ######################################################
 
 PYNAM=ujson
-#NAM=ultrajson-d185144
-NAM=ultrajson-d185144
+NAM=ujson-3.0.0
+##NAM=ultrajson-d185144
 
 PYTHON=python`cat /opt/python`
 EXTNAM=$PYTHON-$PYNAM
@@ -48,8 +48,8 @@ sudo $PYTHON setup.py install
 
 # Move files to tmp dir
 
-cp -rf $PYTDIR/ujson*so  $TMPDIR$PYTDIR
-cp $PYTDIR/easy-install.pth $TMPDIR/$PYTDIR/ujson.pth
+mkdir -p $TMPDIR$PYTDIR
+cp -rf $PYTDIR/ujson*egg/ujson*so  $TMPDIR$PYTDIR
 
 # Delete *.pyc files
 

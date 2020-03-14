@@ -14,7 +14,7 @@
 PYNAM=pyserial
 NAM=serial
 
-PYTHON=`cat /opt/python`
+PYTHON=python`cat /opt/python`
 EXTNAM=$PYTHON-$NAM
 TMPDIR=/tmp/$PYTHON-$NAM
 PYTDIR=/usr/local/lib/$PYTHON/site-packages

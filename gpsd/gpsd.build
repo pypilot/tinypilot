@@ -9,7 +9,7 @@
 # Export variables needed for compilation
 
 
-PYTHON=`cat /opt/python`
+PYTHON=python`cat /opt/python`
 
 # Configure it
 
@@ -63,7 +63,7 @@ cd ..
 rm -rf $WRKDIR
 
 # Adjust directory access rigths
-sudo chown -R tc /tmp/$TMPDIR/$EXTNAM
+sudo chown -R tc $TMPDIR/$EXTNAM
 find $TMPDIR/$EXTNAM/ -type d | xargs chmod -v 755;
 
 # Strip executables

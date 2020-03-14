@@ -43,6 +43,6 @@ ATTR{idVendor}=="0403", ATTR{idProduct}=="6001", SYMLINK="gps%n", RUN+="/lib/ude
 # u-blox 4
 ATTR{idVendor}=="1546", ATTR{idProduct}=="01a4", SYMLINK="gps%n", RUN+="/lib/udev/gpsd.hotplug.wrapper"
 
-ACTION=="remove", RUN+="/lib/udev/gpsd.hotplug.wrapper"
+RUN+="/lib/udev/gpsd.hotplug.wrapper"
 
 LABEL="gpsd_rules_end"
