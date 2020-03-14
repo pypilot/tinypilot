@@ -1,0 +1,60 @@
+#!/bin/sh
+#
+######################################################
+# Build script for RPI                               #
+#                                                    #
+# See .info for details                              #
+######################################################
+
+######################################################
+# Configure extension creation parameters            #
+######################################################
+
+EXTNAM=eepromutils
+TMPDIR=/tmp/eepromutils
+
+DESTDIR=$TMPDIR/usr/local/bin
+
+######################################################
+# Prepare extension creation                         #
+######################################################
+
+INITIALDIR=$PWD
+
+######################################################
+# Compile extension                                  #
+######################################################
+
+# Export variables needed for compilation
+# Compile
+
+make
+
+mkdir -p $DESTDIR
+cp -v eepflash.sh eepmake $DESTDIR
+
+find $TMPDIR/ -type d | xargs chmod -v 755;
+
+# Strip executables
+
+find $TMPDIR | xargs file | grep ELF | cut -f 1 -d : | xargs strip --strip-unneeded
+
+###################################################
+# Create base extension in temp dir               #
+###################################################
+
+cd $TMPDIR
+cd ..
+mksquashfs $TMPDIR $EXTNAM.tcz
+cd $TMPDIR
+find usr -not -type d > $EXTNAM.tcz.list
+mv ../$EXTNAM.tcz .
+
+# Create md5 file
+
+md5sum $EXTNAM.tcz > $EXTNAM.tcz.md5.txt
+
+
+sudo cp -v $EXTNAM.tcz* /mnt/mmcblk0p2/tce/optional
+
+

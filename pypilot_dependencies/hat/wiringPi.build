@@ -1,0 +1,90 @@
+#!/bin/sh
+#
+######################################################
+# Build script for RPI                               #
+#                                                    #
+# See .info for details                              #
+#                                                    #
+# February 13, 2013                                  #
+######################################################
+
+######################################################
+# Configure extension creation parameters            #
+######################################################
+
+SRCNAM=wiringPi.tar.gz
+WRKDIR=wiringPi
+EXTNAM=wiringPi
+
+TMPDIR=/tmp/$EXTNAM
+
+######################################################
+# Prepare extension creation                         #
+######################################################
+
+INITIALDIR=$PWD
+
+# Remove dirs and files left from previous creation
+
+#rm -r -f $PYTDIR/$WRKDIR*.egg
+
+# Create temporary directory
+
+rm -r -f $TMPDIR
+mkdir -p $TMPDIR/lib
+
+######################################################
+# Compile extension                                  #
+######################################################
+
+# Export variables needed for compilation
+
+export CFLAGS="-march=armv6zk -mtune=arm1176jzf-s -mfpu=vfp"
+export CXXFLAGS="-march=armv6zk -mtune=arm1176jzf-s -mfpu=vfp"
+
+# Unpack source in current directory
+
+tar -xf $SRCNAM
+
+# Configure it
+
+# Build and Install
+cd $WRKDIR
+
+cd wiringPi
+make DESTDIR=$TMPDIR install
+cd ../devLib
+make DESTDIR=$TMPDIR install
+
+cd ../gpio
+make DESTDIR=$TMPDIR install
+
+cd ../..
+rm -r -f $WRKDIR
+
+# Adjust directory access rigths
+
+find $TMPDIR/ -type d | xargs chmod -v 755;
+
+###################################################
+# Create base extension in temp dir               #
+###################################################
+
+cd $TMPDIR
+cd ..
+mksquashfs $TMPDIR $EXTNAM.tcz
+cd $TMPDIR
+find usr -not -type d > $EXTNAM.tcz.list
+mv ../$EXTNAM.tcz .
+
+# Create md5 file
+
+md5sum $EXTNAM.tcz > $EXTNAM.tcz.md5.txt
+
+cp -fv $EXTNAM.tcz* /mnt/mmcblk0p2/tce/optional
+
+# Cleanup temp directory
+
+rm -rf *
+
+cd $INITIALDIR

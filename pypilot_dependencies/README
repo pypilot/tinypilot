@@ -1,0 +1,1 @@
+python3.6 get-pip.py --trusted-host pypi.org --trusted-host files.pythonhosted.org

@@ -1,0 +1,73 @@
+#!/bin/sh
+#
+######################################################
+# Build script                                       #
+#                                                    #
+# See .info for details                              #
+######################################################
+
+######################################################
+# Configure extension creation parameters            #
+######################################################
+
+EXTNAM=avrdude
+WRKDIR=avrdude/avrdude
+TMPDIR=/tmp/$EXTNAM
+
+
+######################################################
+# Prepare extension creation                         #
+######################################################
+
+# Remove dirs and files left from previous creation
+
+rm -r -f $TMPDIR
+
+# Create temporary directory
+
+mkdir -p $TMPDIR
+
+######################################################
+# Compile extension                                  #
+######################################################
+
+INITIALDIR=$PWD
+
+# Export variables needed for compilation
+
+
+# Configure it
+
+cd $WRKDIR
+
+# Compile
+./configure
+make
+make DESTDIR=$TMPDIR install
+
+# Adjust directory access rigths
+
+find $TMPDIR/ -type d | xargs chmod -v 755;
+
+# Strip executables
+
+find $TMPDIR | xargs file | grep ELF | cut -f 1 -d : | xargs strip --strip-unneeded
+
+###################################################
+# Create base extension in temp dir               #
+###################################################
+
+cd $TMPDIR
+cd ..
+mksquashfs $TMPDIR $EXTNAM.tcz
+cd $TMPDIR
+find usr -not -type d > $EXTNAM.tcz.list
+mv ../$EXTNAM.tcz .
+
+# Create md5 file
+
+md5sum $EXTNAM.tcz > $EXTNAM.tcz.md5.txt
+
+cp -fv $EXTNAM.tcz* /mnt/mmcblk0p2/tce/optional
+
+cd $INITIALDIR
