@@ -15,7 +15,8 @@
 SRCNAM=RTIMULib2.tar.gz
 WRKDIR=RTIMULib
 
-PYTHON=`cat /opt/python`
+PYTHONVERSION=`cat /opt/python`
+PYTHON=python$PYTHONVERSION
 EXTNAM=$PYTHON-RTIMULib
 TMPDIR=/tmp/$EXTNAM
 PYTDIR=/usr/local/lib/$PYTHON/site-packages
@@ -45,7 +46,7 @@ export CXXFLAGS="-march=armv6zk -mtune=arm1176jzf-s -mfpu=vfp"
 
 # Unpack source in current directory
 
-#tar -xf $SRCNAM
+tar -xf $SRCNAM
 mv RTIMULib2 RTIMULib
 
 # Configure it

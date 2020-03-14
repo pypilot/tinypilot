@@ -14,9 +14,11 @@
 
 SRCNAM=scipy-0.18.1.tar.gz
 WRKDIR=scipy-0.18.1
-EXTNAM=python-scipy
-TMPDIR=/tmp/python-scipy
-PYTDIR=/usr/local/lib/python2.7/site-packages
+PYTHONVERSION=`cat /opt/python`
+PYTHON="python"$PYTHONVERSION
+EXTNAM=$PYTHON-scipy
+TMPDIR=/tmp/$PYTHON-scipy
+PYTDIR=/usr/local/lib/$PYTHON/site-packages
 
 ######################################################
 # Prepare extension creation                         #
@@ -45,7 +47,7 @@ fi
 
 # Unpack source in current directory
 
-#tar -xf $SRCNAM
+tar -xf $SRCNAM
 
 # Configure it
 
@@ -53,7 +55,7 @@ cd $WRKDIR
 
 # Install in place
 
-sudo python setup.py install
+sudo $PYTHON setup.py install
 
 # Delete compilation work directory
 

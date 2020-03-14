@@ -12,14 +12,15 @@
 # Configure extension creation parameters            #
 ######################################################
 
-WRKDIR=pylirc2-0.1
+WRKDIR=python-lirc-1.2.3
 SRCNAM=$WRKDIR.tar.gz
-PYTHON=`cat /opt/python`
-EXTNAM=$PYTHON-numpy
-TMPDIR=/tmp/$PYTHON-numpy
+PYTHON=python`cat /opt/python`
+EXTNAM=$PYTHON-pylirc
+TMPDIR=/tmp/$PYTHON-pylirc
 PYTDIR=/usr/local/lib/$PYTHON/site-packages
 
-wget -c https://files.pythonhosted.org/packages/a9/e1/a19ed9cac5353ec07294be7b1aefc8f89985987b356e916e2c39b5b03d9a/pylirc2-0.1.tar.gz
+#wget -c https://files.pythonhosted.org/packages/a9/e1/a19ed9cac5353ec07294be7b1aefc8f89985987b356e916e2c39b5b03d9a/pylirc2-0.1.tar.gz
+wget -c https://files.pythonhosted.org/packages/20/37/5614ed0459439a96430e1aac479b6608b51e69ca0bd7d91277517d5895e9/python-lirc-1.2.3.tar.gz
 
 
 ######################################################
@@ -66,7 +67,7 @@ rm -rf $WRKDIR
 # Move files to tmp dir
 
 mkdir -p $TMPDIR/$PYTDIR
-cp -r $PYTDIR/pylirc*  $TMPDIR/$PYTDIR
+cp -rv $PYTDIR/pylirc*  $TMPDIR/$PYTDIR
 
 # Delete *.pyc files
 
