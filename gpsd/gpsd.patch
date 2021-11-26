@@ -1,0 +1,31 @@
+--- gpsd-3.23.1.orig/SConscript
++++ gpsd-3.23.1/SConscript
+@@ -347,7 +347,7 @@
+     # Build control
+     ("coveraging",    False, "build with code coveraging enabled"),
+     ("debug",         False, "add debug information to build, unoptimized"),
+-    ("debug_opt",     False, "add debug information to build, optimized"),
++    ("debug_opt",     True, "add debug information to build, optimized"),
+     ("gpsdclients",   True,  "gspd client programs"),
+     ("gpsd",          True,  "gpsd itself"),
+     ("implicit_link", imloads, "implicit linkage is supported in shared libs"),
+@@ -388,7 +388,7 @@
+     rundir = "/var/run"
+ 
+ nonboolopts = (
+-    ("gpsd_group",       def_group,     "privilege revocation group"),
++    ("gpsd_group",       "staff",       "privilege revocation group"),
+     ("gpsd_user",        "nobody",      "privilege revocation user",),
+     ("manbuild",         "auto",
+      "build help in man and HTML formats.  No/Auto/Yes."),
+--- gpsd-3.23.1.orig/gpsd/gpsd.c
++++ gpsd-3.23.1/gpsd/gpsd.c
+@@ -98,7 +98,7 @@
+ #define COMMAND_TIMEOUT         60*15
+ #define NOREAD_TIMEOUT          60*3
+ #define RELEASE_TIMEOUT         60
+-#define DEVICE_REAWAKE          0.01
++#define DEVICE_REAWAKE          0.1
+ #define DEVICE_RECONNECT        2
+ 
+ #define QLEN                    5

@@ -10,8 +10,8 @@
 # Configure extension creation parameters            #
 ######################################################
 
-SRCNAM=lapack-3.1.1.tgz
-WRKDIR=lapack-3.1.1
+SRCNAM=lapack-3.10.0.tar.gz
+WRKDIR=lapack-3.10.0
 EXTNAM=lapack
 TMPDIR=/tmp/lapack
 
@@ -51,7 +51,7 @@ make
 # Install in base temp dir
 
 mkdir -p $TMPDIR/usr/lib
-cp lapack*.a $TMPDIR/usr/lib/liblapack.a
+cp liblapack*.a $TMPDIR/usr/lib/liblapack.a
 
 # Delete compilation work directory
 

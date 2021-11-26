@@ -1,0 +1,6 @@
+#!/bin/sh
+#echo "hotplug $ACTION $DEVNAME" > /tmp/wrapperlog
+if [ "$ACTION" = "add" ]; then
+    stty -F $DEVNAME 4800 # set to 4800 baud!  this is default for gps
+fi
+GPSD_SOCKET=/tmp/gpsd.sock /usr/local/sbin/gpsdctl $ACTION $DEVNAME

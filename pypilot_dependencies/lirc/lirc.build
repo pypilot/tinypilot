@@ -46,7 +46,7 @@ cd $WRKDIR
 # Compile
 
 tce-load -i bash automake autoconf libtool m4
-sudo ln -s /usr/local/bin/python3.6 /usr/local/bin/python3
+sudo ln -s /usr/local/bin/python3.8 /usr/local/bin/python3
 
 ./autogen.sh
 ./configure

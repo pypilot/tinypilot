@@ -5,66 +5,57 @@
 #                                                    #
 # See .info for details                              #
 #                                                    #
-# February 13, 2013                                  #
 ######################################################
 
 ######################################################
 # Configure extension creation parameters            #
 ######################################################
 
-PYTHON=`cat /opt/python`
+PYNAM=pyudev
+NAM=pyudev
 
-SRCNAM=pyudev-git160618.tar.gz
-WRKDIR=pyudev
-EXTNAM=$PYTHON-pyudev
-TMPDIR=/tmp/$PYTHON-pyudev
+PYTHONVERSION=`cat /opt/python`
+PYTHON="python"$PYTHONVERSION
+EXTNAM=$PYTHON-$NAM
+TMPDIR=/tmp/$PYTHON-$NAM
 PYTDIR=/usr/local/lib/$PYTHON/site-packages
 
 ######################################################
 # Prepare extension creation                         #
 ######################################################
 
+INITIALDIR=$PWD
+
 # Remove dirs and files left from previous creation
 
-rm -r -f $PYTDIR/$EXTNAM*.egg
+#sudo pip3.8 uninstall Flask
 
 # Create temporary directory
 
-mkdir -p $TMPDIR/$PYTDIR
+mkdir -p $TMPDIR$PYTDIR
 
 ######################################################
 # Compile extension                                  #
 ######################################################
 
-INITIALDIR=$PWD
-
-# Export variables needed for compilation
-
-export CFLAGS="-Os -pipe"
-export CXXFLAGS="-Os -pipe -fno-exceptions -fno-rtti"
-export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/usr/lib/pkgconfig
-
-# Unpack source in current directory
-
-tar -xf $SRCNAM
-
-# Configure it
-
-cd $WRKDIR
-
 # Install in place
 
-sudo $PYTHON setup.py bdist
-tar xvf dist/*tar.gz -C $TMPDIR
+sudo pip3.8 install $PYNAM
 
-# Delete compilation work directory
+# Move files to tmp dir
+mkdir -p $TMPDIR$PYTDIR
+cp -rf $PYTDIR/$PYNAM-*-info $PYTDIR/$NAM $PYTDIR/$NAM*py $PYTDIR/$NAM*so $TMPDIR$PYTDIR
 
-cd ..
-rm -r -f $WRKDIR
+# Delete *.pyc files
+
+find $TMPDIR/ -name *.pyc | xargs rm -r
 
 # Adjust directory access rigths
 
 find $TMPDIR/ -type d | xargs chmod -v 755;
+
+find $TMPDIR | xargs file | grep ELF | cut -f 1 -d : | xargs strip --strip-unneeded
+
 
 ###################################################
 # Create base extension in temp dir               #
@@ -75,13 +66,14 @@ cd ..
 mksquashfs $TMPDIR $EXTNAM.tcz
 cd $TMPDIR
 find usr -not -type d > $EXTNAM.tcz.list
-mv ../$EXTNAM.tcz .
+mv -f ../$EXTNAM.tcz .
 
 # Create md5 file
 
 md5sum $EXTNAM.tcz > $EXTNAM.tcz.md5.txt
 
-cp -fv $EXTNAM.tcz* /mnt/mmcblk0p2/tce/optional
+# copy extension files
+cp $EXTNAM.tcz* /mnt/mmcblk0p2/tce/optional
 
 # Cleanup temp directory
 

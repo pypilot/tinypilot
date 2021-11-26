@@ -27,7 +27,9 @@ INITIALDIR=$PWD
 
 # Remove dirs and files left from previous creation
 
-#sudo pip3.6 uninstall Flask
+sudo pip3.8 uninstall $PYNAM
+sudo pip3.8 uninstall pytz
+sudo pip3.8 uninstall Flask_$PYNAM
 
 # Create temporary directory
 
@@ -39,10 +41,12 @@ mkdir -p $TMPDIR$PYTDIR
 
 # Install in place
 
-#sudo pip3.6 install $PYNAM
-sudo pip3.6 install pytz*whl
-sudo pip3.6 install $PYNAM*whl
-sudo pip3.6 install Flask_$PYNAM*whl
+#sudo pip3.8 install $PYNAM==2.9.1
+#sudo pip3.8 install pytz==2021.3
+#sudo pip3.8 install Flask_$PYNAM==2.0.0
+sudo pip3.8 install $PYNAM
+sudo pip3.8 install pytz
+sudo pip3.8 install Flask_$PYNAM
 
 # Move files to tmp dir
 
@@ -60,7 +64,7 @@ find $TMPDIR/ -type d | xargs chmod -v 755;
 
 find $TMPDIR | xargs file | grep ELF | cut -f 1 -d : | xargs strip --strip-unneeded
 
-rm -r $TMPDIR/usr/local/lib/$PYTHON/site-packages/babel/locale-data
+#rm -r $TMPDIR/usr/local/lib/$PYTHON/site-packages/babel/locale-data
 
 # NOTE
 # I made all locale-data dat files empty

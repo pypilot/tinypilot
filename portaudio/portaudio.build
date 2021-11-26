@@ -10,7 +10,7 @@
 # Configure extension creation parameters            #
 ######################################################
 
-SRCNAM=pa_stable_v190600_20161030.tgz
+SRCNAM=pa_stable_v190700_20210406.tgz
 WRKDIR=portaudio
 EXTNAM=portaudio
 TMPDIR=/tmp/portaudio

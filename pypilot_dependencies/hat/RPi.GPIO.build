@@ -12,7 +12,7 @@
 # Configure extension creation parameters            #
 ######################################################
 
-PYTHON=`cat /opt/python`
+PYTHON=python`cat /opt/python`
 
 
 WRKDIR=RPi.GPIO-0.7.0
@@ -54,6 +54,7 @@ tar -xf $SRCNAM
 # Configure it
 
 cd $WRKDIR
+patch -p1 < ../RPi.GPIO.patch
 
 # Install in place
 

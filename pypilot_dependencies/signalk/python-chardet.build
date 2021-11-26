@@ -39,7 +39,7 @@ mkdir -p $TMPDIR$PYTDIR
 
 # Install in place
 
-sudo -H pip3.6 --trusted-host pypi.org --trusted-host files.pythonhosted.org install $PYNAM
+sudo -H pip3.8 --trusted-host pypi.org --trusted-host files.pythonhosted.org install $PYNAM
 
 # Move files to tmp dir
 

@@ -12,11 +12,10 @@
 ######################################################
 
 PYNAM=ujson
-NAM=ujson-3.0.0
-##NAM=ultrajson-d185144
+NAM=ujson
 
 PYTHON=python`cat /opt/python`
-EXTNAM=$PYTHON-$PYNAM
+EXTNAM=$PYTHON-$NAM
 TMPDIR=/tmp/$PYTHON-$NAM
 PYTDIR=/usr/local/lib/$PYTHON/site-packages
 
@@ -27,10 +26,8 @@ PYTDIR=/usr/local/lib/$PYTHON/site-packages
 INITIALDIR=$PWD
 
 # Remove dirs and files left from previous creation
-if [ -e $PYTDIR/easy-install.pth ]; then
-	echo 'please remove the file:'
-	echo $PYTDIR/easy-install.pth
-fi
+
+sudo pip3.8 uninstall $PYNAM
 
 # Create temporary directory
 
@@ -41,15 +38,12 @@ mkdir -p $TMPDIR$PYTDIR
 ######################################################
 
 # Install in place
-tar zxvf $NAM*tar.gz
-cd $NAM*
 
-sudo $PYTHON setup.py install
+sudo pip3.8 install $PYNAM
 
 # Move files to tmp dir
 
-mkdir -p $TMPDIR$PYTDIR
-cp -rf $PYTDIR/ujson*egg/ujson*so  $TMPDIR$PYTDIR
+cp -rf $PYTDIR/$PYNAM-*-info $PYTDIR/$NAM $PYTDIR/$NAM*py $PYTDIR/$NAM*so $TMPDIR$PYTDIR
 
 # Delete *.pyc files
 

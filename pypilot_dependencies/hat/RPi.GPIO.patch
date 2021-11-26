@@ -1,0 +1,139 @@
+--- RPi.GPIO-0.7.0.orig/source/common.c
++++ RPi.GPIO-0.7.0/source/common.c
+@@ -31,6 +31,10 @@
+ int setup_error = 0;
+ int module_setup = 0;
+ 
++const int (*pin_to_gpio)[41];
++int gpio_direction[54];
++rpi_info rpiinfo;
++
+ int check_gpio_priv(void)
+ {
+     // check module has been imported cleanly
+--- RPi.GPIO-0.7.0.orig/source/common.h
++++ RPi.GPIO-0.7.0/source/common.h
+@@ -30,14 +30,14 @@
+ #define I2C          42
+ #define PWM          43
+ 
+-int gpio_mode;
+-const int pin_to_gpio_rev1[41];
+-const int pin_to_gpio_rev2[41];
+-const int pin_to_gpio_rev3[41];
+-const int (*pin_to_gpio)[41];
+-int gpio_direction[54];
+-rpi_info rpiinfo;
+-int setup_error;
+-int module_setup;
++extern int gpio_mode;
++extern const int pin_to_gpio_rev1[41];
++extern const int pin_to_gpio_rev2[41];
++extern const int pin_to_gpio_rev3[41];
++extern const int (*pin_to_gpio)[41];
++extern int gpio_direction[54];
++extern rpi_info rpiinfo;
++extern int setup_error;
++extern int module_setup;
+ int check_gpio_priv(void);
+ int get_gpio_number(int channel, unsigned int *gpio);
+--- RPi.GPIO-0.7.0.orig/source/constants.c
++++ RPi.GPIO-0.7.0/source/constants.c
+@@ -26,6 +26,24 @@
+ #include "c_gpio.h"
+ #include "event_gpio.h"
+ 
++PyObject *high;
++PyObject *low;
++PyObject *input;
++PyObject *output;
++PyObject *pwm;
++PyObject *serial;
++PyObject *i2c;
++PyObject *spi;
++PyObject *unknown;
++PyObject *board;
++PyObject *bcm;
++PyObject *pud_off;
++PyObject *pud_up;
++PyObject *pud_down;
++PyObject *rising_edge;
++PyObject *falling_edge;
++PyObject *both_edge;
++
+ void define_constants(PyObject *module)
+ {
+    high = Py_BuildValue("i", HIGH);
+--- RPi.GPIO-0.7.0.orig/source/constants.h
++++ RPi.GPIO-0.7.0/source/constants.h
+@@ -23,22 +23,22 @@
+ #define PY_PUD_CONST_OFFSET 20
+ #define PY_EVENT_CONST_OFFSET 30
+ 
+-PyObject *high;
+-PyObject *low;
+-PyObject *input;
+-PyObject *output;
+-PyObject *pwm;
+-PyObject *serial;
+-PyObject *i2c;
+-PyObject *spi;
+-PyObject *unknown;
+-PyObject *board;
+-PyObject *bcm;
+-PyObject *pud_off;
+-PyObject *pud_up;
+-PyObject *pud_down;
+-PyObject *rising_edge;
+-PyObject *falling_edge;
+-PyObject *both_edge;
++extern PyObject *high;
++extern PyObject *low;
++extern PyObject *input;
++extern PyObject *output;
++extern PyObject *pwm;
++extern PyObject *serial;
++extern PyObject *i2c;
++extern PyObject *spi;
++extern PyObject *unknown;
++extern PyObject *board;
++extern PyObject *bcm;
++extern PyObject *pud_off;
++extern PyObject *pud_up;
++extern PyObject *pud_down;
++extern PyObject *rising_edge;
++extern PyObject *falling_edge;
++extern PyObject *both_edge;
+ 
+ void define_constants(PyObject *module);
+--- RPi.GPIO-0.7.0.orig/source/event_gpio.c
++++ RPi.GPIO-0.7.0/source/event_gpio.c
+@@ -57,7 +57,7 @@
+ };
+ struct callback *callbacks = NULL;
+ 
+-pthread_t threads;
++static pthread_t threads;
+ int event_occurred[54] = { 0 };
+ int thread_running = 0;
+ int epfd_thread = -1;
+--- RPi.GPIO-0.7.0.orig/source/py_pwm.h
++++ RPi.GPIO-0.7.0/source/py_pwm.h
+@@ -20,5 +20,5 @@
+ SOFTWARE.
+ */
+ 
+-PyTypeObject PWMType;
++extern PyTypeObject PWMType;
+ PyTypeObject *PWM_init_PWMType(void);
+--- RPi.GPIO-0.7.0.orig/source/soft_pwm.c
++++ RPi.GPIO-0.7.0/source/soft_pwm.c
+@@ -25,7 +25,7 @@
+ #include <time.h>
+ #include "c_gpio.h"
+ #include "soft_pwm.h"
+-pthread_t threads;
++static pthread_t threads;
+ 
+ struct pwm
+ {
