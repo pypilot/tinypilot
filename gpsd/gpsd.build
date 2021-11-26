@@ -13,7 +13,7 @@ PYTHON=python`cat /opt/python`
 
 # Configure it
 
-WRKDIR=gpsd-3.20
+WRKDIR=gpsd-3.23.1
 SRCNAM=$WRKDIR.tar.xz
 EXTNAM=gpsd
 TMPDIR=/tmp
@@ -50,6 +50,7 @@ export CFLAGS="-Os -march=armv6zk -mtune=arm1176jzf-s -mfpu=vfp"
 export CXXFLAGS="-Os -march=armv6zk -mtune=arm1176jzf-s -mfpu=vfp"
 
 cd $WRKDIR
+patch -p1 < ../gpsd.patch
 
 # Compile
 # Install in base temp dir

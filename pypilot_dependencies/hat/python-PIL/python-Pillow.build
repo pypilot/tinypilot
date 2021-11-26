@@ -1,0 +1,81 @@
+#!/bin/sh
+#
+######################################################
+# Build script for RPI                               #
+#                                                    #
+# See .info for details                              #
+#                                                    #
+######################################################
+
+######################################################
+# Configure extension creation parameters            #
+######################################################
+
+PYNAM=Pillow
+NAM=Pillow
+
+PYTHON=python`cat /opt/python`
+EXTNAM=$PYTHON-$NAM
+TMPDIR=/tmp/$PYTHON-$NAM
+PYTDIR=/usr/local/lib/$PYTHON/site-packages
+
+######################################################
+# Prepare extension creation                         #
+######################################################
+
+INITIALDIR=$PWD
+
+# Remove dirs and files left from previous creation
+
+sudo pip3.8 uninstall $PYNAM
+
+# Create temporary directory
+
+mkdir -p $TMPDIR$PYTDIR
+
+######################################################
+# Compile extension                                  #
+######################################################
+
+# Install in place
+
+sudo pip3.8 install $PYNAM
+
+# Move files to tmp dir
+
+cp -rf $PYTDIR/PIL* $PYTDIR/$PYNAM-*-info $TMPDIR$PYTDIR
+
+# Delete *.pyc files
+
+find $TMPDIR/ -name *.pyc | xargs rm -r
+
+# Adjust directory access rigths
+
+find $TMPDIR/ -type d | xargs chmod -v 755;
+
+find $TMPDIR | xargs file | grep ELF | cut -f 1 -d : | xargs strip --strip-unneeded
+
+
+###################################################
+# Create base extension in temp dir               #
+###################################################
+
+cd $TMPDIR
+cd ..
+mksquashfs $TMPDIR $EXTNAM.tcz
+cd $TMPDIR
+find usr -not -type d > $EXTNAM.tcz.list
+mv -f ../$EXTNAM.tcz .
+
+# Create md5 file
+
+md5sum $EXTNAM.tcz > $EXTNAM.tcz.md5.txt
+
+# copy extension files
+cp $EXTNAM.tcz* /mnt/mmcblk0p2/tce/optional
+
+# Cleanup temp directory
+
+rm -rf *
+
+cd $INITIALDIR

@@ -1,0 +1,91 @@
+#!/bin/sh
+#
+######################################################
+# Build script for RPI                               #
+#                                                    #
+# See .info for details                              #
+######################################################
+
+######################################################
+# Configure extension creation parameters            #
+######################################################
+
+EXTNAM=gfortran
+TMPDIR=/mnt/mmcblk0p2/tinypilot/gfortran/tmp
+
+######################################################
+# Prepare extension creation                         #
+######################################################
+
+INITIALDIR=$PWD
+
+######################################################
+# Compile extension                                  #
+######################################################
+
+# Export variables needed for compilation
+# Compile
+
+cd gcc-build
+
+mkdir -p $TMPDIR
+make install DESTDIR=$TMPDIR
+
+find $TMPDIR/ -type d | xargs chmod -v 755;
+
+# Strip executables
+
+find $TMPDIR | xargs file | grep ELF | cut -f 1 -d : | xargs strip --strip-unneeded
+
+###################################################
+# Create base extension in temp dir               #
+###################################################
+
+mkdir -p $TMPDIR-bin $TMPDIR-lib
+mkdir -p $TMPDIR-bin/usr/local/libexec/gcc/armv7l-unknown-linux-gnueabihf/10.2.0/
+cp -a $TMPDIR/usr/local/libexec/gcc/armv7l-unknown-linux-gnueabihf/10.2.0/f951 $TMPDIR-bin/usr/local/libexec/gcc/armv7l-unknown-linux-gnueabihf/10.2.0/
+cp -a $TMPDIR/usr/local/libexec/gcc/armv7l-unknown-linux-gnueabihf/10.2.0/liblto_plugin.* $TMPDIR-bin/usr/local/libexec/gcc/armv7l-unknown-linux-gnueabihf/10.2.0/
+mkdir -p $TMPDIR-bin/usr/lib/gcc/armv7l-unknown-linux-gnueabihf/10.2.0/
+cp -a $TMPDIR/usr/lib/gcc/armv7l-unknown-linux-gnueabihf/10.2.0/finclude $TMPDIR-bin/usr/lib/gcc/armv7l-unknown-linux-gnueabihf/10.2.0/
+cp -a $TMPDIR/usr/lib/gcc/armv7l-unknown-linux-gnueabihf/10.2.0/crt*.o $TMPDIR-bin/usr/lib/gcc/armv7l-unknown-linux-gnueabihf/10.2.0/
+cp -a $TMPDIR/usr/lib/gcc/armv7l-unknown-linux-gnueabihf/10.2.0/libgcc*.a $TMPDIR-bin/usr/lib/gcc/armv7l-unknown-linux-gnueabihf/10.2.0/
+mkdir -p $TMPDIR-bin/usr/lib/
+cp -a $TMPDIR/usr/lib/libgfortran.a $TMPDIR-bin/usr/lib/
+cp -a $TMPDIR/usr/lib/libgfortran.la $TMPDIR-bin/usr/lib/
+cp -a $TMPDIR/usr/lib/libgfortran.spec $TMPDIR-bin/usr/lib/
+mkdir -p $TMPDIR-bin/usr/local/bin/
+cp -a $TMPDIR/usr/local/bin/gfortran $TMPDIR-bin/usr/local/bin
+cp -a $TMPDIR/usr/local/bin/armv7l-unknown-linux-gnueabihf-gfortran $TMPDIR-bin/usr/local/bin
+mkdir -p $TMPDIR-lib/usr/lib/
+cp -a $TMPDIR/usr/lib/libgfortran.so $TMPDIR-lib/usr/lib/
+cp -a $TMPDIR/usr/lib/libgfortran.so.5 $TMPDIR-lib/usr/lib/
+cp -a $TMPDIR/usr/lib/libgfortran.so.5.0.0 $TMPDIR-lib/usr/lib/
+
+find $TMPDIR-bin/ -type d | xargs chmod -v 755;
+find $TMPDIR-lib/ -type d | xargs chmod -v 755;
+
+cd $TMPDIR-bin
+cd ..
+mksquashfs $TMPDIR-bin $EXTNAM.tcz
+cd $TMPDIR-bin
+find usr -not -type d > $EXTNAM.tcz.list
+mv ../$EXTNAM.tcz* .
+
+# Create md5 file
+
+md5sum $EXTNAM.tcz > $EXTNAM.tcz.md5.txt
+
+sudo cp -v $EXTNAM.tcz* /mnt/mmcblk0p2/tce/optional
+
+cd $TMPDIR-lib
+cd ..
+mksquashfs $TMPDIR-lib $EXTNAM-lib.tcz
+cd $TMPDIR-lib
+find usr -not -type d > $EXTNAM-lib.tcz.list
+mv ../$EXTNAM-lib.tcz* .
+
+# Create md5 file
+
+md5sum $EXTNAM-lib.tcz > $EXTNAM-lib.tcz.md5.txt
+
+sudo cp -v $EXTNAM-lib.tcz* /mnt/mmcblk0p2/tce/optional

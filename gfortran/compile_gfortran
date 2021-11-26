@@ -1,0 +1,16 @@
+tce-load -i mpc-dev texinfo gperf isl-dev
+
+cd gcc-10.2.0
+
+mkdir ../gcc-build
+cd ../gcc-build
+
+CC="gcc -Os -pipe" CXX="g++ -Os -pipe" ../gcc-10.2.0/configure --libdir=/usr/lib --enable-shared --enable-threads=posix --enable-__cxa_atexit --enable-c99 --enable-long-long --enable-clocale=gnu --enable-languages=c,c++,fortran,go --disable-multilib --disable-libstdcxx-pch --enable-cloog-backend=isl --with-isl=/usr --with-system-zlib --enable-frame-pointer --disable-bootstrap --enable-lto --with-pkgversion=piCore --with-arch=armv6zk --with-tune=arm1176jzf-s --with-fpu=vfp --with-float=hard --with-gxx-include-dir=/usr/include/c++/10.2.0
+
+find . -name Makefile -type f -exec sed -i 's/-g -O2//g' {} \;
+find . -name Makefile -type f -exec sed -i 's/-O2 -g//g' {} \;
+find . -name config.status -type f -exec sed -i 's/-g -O2//g' {} \;
+
+time make
+sudo make install
+

@@ -10,8 +10,8 @@
 # Configure extension creation parameters            #
 ######################################################
 
-SRCNAM=alsa-lib-1.1.1.tar.bz2
-WRKDIR=alsa-lib-1.1.1
+SRCNAM=alsa-lib-1.2.5.1.tar.bz2
+WRKDIR=alsa-lib-1.2.5.1
 EXTNAM=alsa
 TMPDIR=/tmp/alsa
 
@@ -84,7 +84,7 @@ mv $TMPDIR/usr/local/lib/pkgconfig $TMPDIR-dev/usr/local/lib
 cp *.patch $TMPDIR
 cd $TMPDIR
 cd usr
-patch -p1 < alsa-ipc-gid.patch
+patch -p1 < ../alsa-ipc-gid.patch
 cd ..
 rm -f alsa-ipc-gid.patch
 

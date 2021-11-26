@@ -10,8 +10,8 @@
 # Configure extension creation parameters            #
 ######################################################
 
-SRCNAM=blas-3.5.0.tar.gz
-WRKDIR=BLAS-3.5.0
+SRCNAM=blas-3.10.0.tgz
+WRKDIR=BLAS-3.10.0
 EXTNAM=blas
 TMPDIR=/tmp/blas
 
@@ -50,7 +50,7 @@ make
 # Install in base temp dir
 
 mkdir -p $TMPDIR/usr/lib
-cp blas*.a $TMPDIR/usr/lib/libblas.a
+cp blas_LINUX.a $TMPDIR/usr/lib/libblas.a
 
 # Delete compilation work directory
 

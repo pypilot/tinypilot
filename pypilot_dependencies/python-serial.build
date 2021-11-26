@@ -39,7 +39,7 @@ mkdir -p $TMPDIR$PYTDIR
 
 # Install in place
 
-sudo pip3.6 install $PYNAM
+sudo pip3.8 install $PYNAM
 
 # Move files to tmp dir
 

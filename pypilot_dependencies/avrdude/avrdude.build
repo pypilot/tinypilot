@@ -11,13 +11,15 @@
 ######################################################
 
 EXTNAM=avrdude
-WRKDIR=avrdude/avrdude
+WRKDIR=avrdude
 TMPDIR=/tmp/$EXTNAM
 
 
 ######################################################
 # Prepare extension creation                         #
 ######################################################
+
+su tc -c "tce-load -i m4 libtool autoconf automake sed grep libelf-dev bison"
 
 # Remove dirs and files left from previous creation
 
@@ -26,6 +28,8 @@ rm -r -f $TMPDIR
 # Create temporary directory
 
 mkdir -p $TMPDIR
+
+tar xvf avrdude.tar.gz
 
 ######################################################
 # Compile extension                                  #
@@ -41,7 +45,8 @@ INITIALDIR=$PWD
 cd $WRKDIR
 
 # Compile
-./configure
+./bootstrap
+./configure --enable-linuxspi
 make
 make DESTDIR=$TMPDIR install
 

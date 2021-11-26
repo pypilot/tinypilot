@@ -1,0 +1,11 @@
+--- /tmp/tcloop/python3.6-serial/usr/local/lib/python3.6/site-packages/serial/serialposix.py
++++ serialposix.py
+@@ -287,7 +287,7 @@
+             if not self._rtscts:
+                 self._update_rts_state()
+         except IOError as e:
+-            if e.errno in (errno.EINVAL, errno.ENOTTY):
++            if e.errno in (errno.EINVAL, errno.ENOTTY, errno.EIO):
+                 # ignore Invalid argument and Inappropriate ioctl
+                 pass
+             else:

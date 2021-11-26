@@ -52,12 +52,12 @@ tar -xf $SRCNAM
 cd $WRKDIR
 
 cd wiringPi
-make DESTDIR=$TMPDIR install
+make DESTDIR=$TMPDIR/usr install
 cd ../devLib
-make DESTDIR=$TMPDIR install
+make DESTDIR=$TMPDIR/usr install
 
 cd ../gpio
-make DESTDIR=$TMPDIR install
+make DESTDIR=$TMPDIR/usr install
 
 cd ../..
 rm -r -f $WRKDIR
