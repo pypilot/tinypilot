@@ -12,79 +12,71 @@
 # Configure extension creation parameters            #
 ######################################################
 
-WRKDIR=numpy-1.18.1
-SRCNAM=$WRKDIR.tar.gz
-PYTHON=`cat /opt/python`
-EXTNAM=$PYTHON-numpy
-TMPDIR=/tmp/$PYTHON-numpy
-PYTDIR=/usr/local/lib/$PYTHON/site-packages
+tce-load -i python3.11-setuptools
 
-wget -c https://github.com/numpy/numpy/releases/download/v1.18.1/numpy-1.18.1.tar.gz
-#wget -c https://github.com/numpy/numpy/releases/download/v1.12.0rc2/numpy-1.12.0rc2.tar.gz
+wget -c http://abyz.me.uk/lg/lg.zip
+
+SRCNAM=lg.zip
+WRKDIR=lg
+EXTNAM=lgpio
+
+TMPDIR=/tmp/$EXTNAM
 
 ######################################################
 # Prepare extension creation                         #
 ######################################################
 
+INITIALDIR=$PWD
+
 # Remove dirs and files left from previous creation
 
-rm -r -f $PYTDIR/$EXTNAM*.egg
+#rm -r -f $PYTDIR/$WRKDIR*.egg
 
 # Create temporary directory
 
-mkdir -p $TMPDIR/$PYTDIR
+rm -r -f $TMPDIR
+mkdir -p $TMPDIR/lib
 
 ######################################################
 # Compile extension                                  #
 ######################################################
 
-INITIALDIR=$PWD
-
 # Export variables needed for compilation
 
-export CFLAGS="-Os -pipe"
-export CXXFLAGS="-Os -pipe -fno-exceptions -fno-rtti"
-export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/usr/lib/pkgconfig
+export CFLAGS="-march=armv6zk -mtune=arm1176jzf-s -mfpu=vfp"
+export CXXFLAGS="-march=armv6zk -mtune=arm1176jzf-s -mfpu=vfp"
 
 # Unpack source in current directory
 
-tar -xf $SRCNAM
+unzip $SRCNAM
 
 # Configure it
 
+# Build and Install
 cd $WRKDIR
 
-# Install in place
-
-sudo $PYTHON setup.py install
-
-# Delete compilation work directory
+make
+make DESTDIR=$TMPDIR install
 
 cd ..
-rm -rf $WRKDIR
-
-# Move files to tmp dir
-
-mkdir -p $TMPDIR/$PYTDIR
-cp -r $PYTDIR/numpy-*.egg $TMPDIR/$PYTDIR
-
-# Delete *.pyc files
-
-find $TMPDIR/ -name *.pyc | xargs rm -r
+rm -r -f $WRKDIR
 
 # Adjust directory access rigths
 
 find $TMPDIR/ -type d | xargs chmod -v 755;
 
-# Strip executables
+# Delete *.pyc files
 
-find $TMPDIR | xargs file | grep ELF | cut -f 1 -d : | xargs strip --strip-unneeded
+find $TMPDIR/ -name *.pyc | xargs rm -r
+
 
 ###################################################
 # Create base extension in temp dir               #
 ###################################################
 
 cd $TMPDIR
+rm -rf usr/local/man
+
 cd ..
 mksquashfs $TMPDIR $EXTNAM.tcz
 cd $TMPDIR

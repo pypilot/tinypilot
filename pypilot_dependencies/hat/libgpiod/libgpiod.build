@@ -1,0 +1,60 @@
+WRKDIR=libgpiod-2.1.3
+EXTNAM=libgpiod
+
+TMPDIR=/tmp/$EXTNAM
+
+INITIALDIR=$PWD
+mkdir -p $TMPDIR/lib
+
+wget -c https://mirrors.edge.kernel.org/pub/software/libs/libgpiod/$WRKDIR.xz
+
+######################################################
+# Compile extension                                  #
+######################################################
+export CFLAGS="-march=armv6zk -mtune=arm1176jzf-s -mfpu=vfp"
+export CXXFLAGS="-march=armv6zk -mtune=arm1176jzf-s -mfpu=vfp"
+
+tar xvf $WRKDIR.tar.xz
+cd $WRKDIR
+#sudo ln -s /usr/local/bin/python3.11-config /usr/local/bin/python3-config
+
+./configure --prefix=$TMPDIR/usr/local \
+  --enable-tools=yes \
+  --enable-bindings-cxx=no \
+  --enable-bindings-python=no \
+  --disable-tests \
+  --disable-examples
+
+make
+make install
+
+cd ..
+rm -r -f $WRKDIR
+
+find $TMPDIR/ -type d | xargs chmod -v 755;
+#find $TMPDIR/ -name *.pyc | xargs rm -r
+
+###################################################
+# Create base extension in temp dir               #
+###################################################
+
+cd $TMPDIR
+rm -rf usr/local/man
+
+cd ..
+mksquashfs $TMPDIR $EXTNAM.tcz
+cd $TMPDIR
+find usr -not -type d > $EXTNAM.tcz.list
+mv ../$EXTNAM.tcz .
+
+# Create md5 file
+
+md5sum $EXTNAM.tcz > $EXTNAM.tcz.md5.txt
+
+cp -fv $EXTNAM.tcz* /mnt/mmcblk0p2/tce/optional
+
+# Cleanup temp directory
+
+rm -rf *
+
+cd $INITIALDIR

@@ -13,8 +13,8 @@ export CXXFLAGS="-Os -march=armv6zk -mtune=arm1176jzf-s -mfpu=vfp"
 
 # Configure it
 
-SRCNAM=emacs.tar.xz
-WRKDIR=emacs
+SRCNAM=emacs-30.2.tar.xz
+WRKDIR=emacs-30.2
 EXTNAM=emacs
 TMPDIR=/tmp/emacs
 

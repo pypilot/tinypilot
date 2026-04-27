@@ -5,20 +5,17 @@
 #                                                    #
 # See .info for details                              #
 #                                                    #
-# February 13, 2013                                  #
 ######################################################
 
 ######################################################
 # Configure extension creation parameters            #
 ######################################################
 
-tce-load -i python3.11-pip
+tce-load -i python3.11-pip zlib_base-dev libjpeg-turbo-dev
+tce-load -i freetype-dev # glib2-python
 
-PYTHONVERSION=`cat /opt/python`
-PYTHON=python$PYTHONVERSION
-
-PYNAM=pyserial
-NAM=serial
+PYNAM=pillow
+NAM=PIL
 
 PYTHON=python`cat /opt/python`
 EXTNAM=$PYTHON-$NAM
@@ -29,27 +26,30 @@ PYTDIR=/usr/local/lib/$PYTHON/site-packages
 # Prepare extension creation                         #
 ######################################################
 
-# Remove dirs and files left from previous creation
+#wget -c https://files.pythonhosted.org/packages/1f/42/5c74462b4fd957fcd7b13b04fb3205ff8349236ea74c7c375766d6c82288/pillow-12.1.1.tar.gz
 
 INITIALDIR=$PWD
 
-#rm -r -f $PYTDIR/$EXTNAM*.egg
+# Remove dirs and files left from previous creation
 
 # Create temporary directory
 
-mkdir -p $TMPDIR/$PYTDIR
+mkdir -p $TMPDIR$PYTDIR
 
 ######################################################
 # Compile extension                                  #
 ######################################################
 
+# Install in place
+
 sudo -H pip install $PYNAM
+# Move files to tmp dir
 
 cp -rf $PYTDIR/$PYNAM-*-info $PYTDIR/$NAM $PYTDIR/$NAM*py $TMPDIR$PYTDIR
 
 # Delete *.pyc files
 
-#find $TMPDIR/ -name *.pyc | xargs rm -r
+find $TMPDIR/ -name *.pyc | xargs rm -r
 
 # Adjust directory access rigths
 
@@ -57,9 +57,6 @@ find $TMPDIR/ -type d | xargs chmod -v 755;
 
 find $TMPDIR | xargs file | grep ELF | cut -f 1 -d : | xargs strip --strip-unneeded
 
-
-cd $TMPDIR
-patch -p1 < $INITIALDIR/pyserial.patch
 
 ###################################################
 # Create base extension in temp dir               #
@@ -82,5 +79,3 @@ sudo cp -v $EXTNAM.tcz* /mnt/mmcblk0p2/tce/optional
 # Cleanup temp directory
 
 rm -rf *
-
-cd $INITIALDIR

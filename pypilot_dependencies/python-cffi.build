@@ -12,13 +12,17 @@
 # Configure extension creation parameters            #
 ######################################################
 
-PYTHON=`cat /opt/python`
+tce-load -i python3.11-pip
+tce-load -i autoconf automake m4
 
-SRCNAM=spidev-3.4.tar.gz
-WRKDIR=spidev-3.4
-EXTNAM=$PYTHON-spidev
-TMPDIR=/tmp/$PYTHON-spidev
+PYNAM=cffi
+NAM=cffi
+
+PYTHON=python`cat /opt/python`
+EXTNAM=$PYTHON-$PYNAM
+TMPDIR=/tmp/$PYTHON-$NAM
 PYTDIR=/usr/local/lib/$PYTHON/site-packages
+
 
 ######################################################
 # Prepare extension creation                         #
@@ -26,7 +30,7 @@ PYTDIR=/usr/local/lib/$PYTHON/site-packages
 
 # Remove dirs and files left from previous creation
 
-rm -r -f $PYTDIR/$EXTNAM*.egg
+INITIALDIR=$PWD
 
 # Create temporary directory
 
@@ -36,35 +40,21 @@ mkdir -p $TMPDIR/$PYTDIR
 # Compile extension                                  #
 ######################################################
 
-INITIALDIR=$PWD
+sudo pip install $PYNAM
 
-# Export variables needed for compilation
+cp -rf $PYTDIR/$PYNAM-*-info $PYTDIR/$NAM $PYTDIR/$NAM*py $TMPDIR$PYTDIR
+cp $PYTDIR/_cffi_backend.cpython-311-arm-linux-gnueabihf.so $TMPDIR$PYTDIR
 
-export CFLAGS="-Os -pipe"
-export CXXFLAGS="-Os -pipe -fno-exceptions -fno-rtti"
-export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/usr/lib/pkgconfig
+# Delete *.pyc files
 
-# Unpack source in current directory
-
-tar -xf $SRCNAM
-
-# Configure it
-
-cd $WRKDIR
-
-# Install in place
-
-sudo $PYTHON setup.py bdist
-tar xvf dist/*tar.gz -C $TMPDIR
-
-# Delete compilation work directory
-
-cd ..
-rm -r -f $WRKDIR
+find $TMPDIR/ -name *.pyc | xargs rm -r
 
 # Adjust directory access rigths
 
 find $TMPDIR/ -type d | xargs chmod -v 755;
+
+find $TMPDIR | xargs file | grep ELF | cut -f 1 -d : | xargs strip --strip-unneeded
+
 
 ###################################################
 # Create base extension in temp dir               #
@@ -75,16 +65,15 @@ cd ..
 mksquashfs $TMPDIR $EXTNAM.tcz
 cd $TMPDIR
 find usr -not -type d > $EXTNAM.tcz.list
-mv ../$EXTNAM.tcz .
+mv -f ../$EXTNAM.tcz .
 
 # Create md5 file
 
 md5sum $EXTNAM.tcz > $EXTNAM.tcz.md5.txt
 
-cp -fv $EXTNAM.tcz* /mnt/mmcblk0p2/tce/optional
+# copy extension files
+sudo cp -v $EXTNAM.tcz* /mnt/mmcblk0p2/tce/optional
 
 # Cleanup temp directory
 
 rm -rf *
-
-cd $INITIALDIR

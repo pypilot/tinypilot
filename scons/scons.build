@@ -12,11 +12,11 @@
 # Configure extension creation parameters            #
 ######################################################
 
-PYTHON=`cat /opt/python`
+PYTHON=python`cat /opt/python`
 
 
-WRKDIR=scons-3.1.2
-SRCNAM=$WRKDIR.tar.gz
+WRKDIR=scons-4.8.1
+SRCNAM=SCons-4.8.1.tar.gz
 EXTNAM=scons
 TMPDIR=/tmp/$PYTHON-$EXTNAM
 PYTDIR=/usr/local/lib/$PYTHON/site-packages
@@ -67,11 +67,13 @@ sudo rm -rf $WRKDIR
 # Move files to tmp dir
 
 mkdir -p $TMPDIR/$PYTDIR
-cp -rv $PYTDIR/RPi* $TMPDIR/$PYTDIR
+cp -rv $PYTDIR/SCons* $TMPDIR/$PYTDIR
 
 # Delete *.pyc files
 
 find $TMPDIR/ -name *.pyc | xargs rm -r
+
+find $TMPDIR/ -name docbook | xargs rm -r
 
 # Adjust directory access rigths
 

@@ -5,45 +5,51 @@
 #                                                    #
 # See .info for details                              #
 #                                                    #
+# February 13, 2013                                  #
 ######################################################
 
 ######################################################
 # Configure extension creation parameters            #
 ######################################################
 
-PYNAM=gevent_websocket
-NAM=geventwebsocket
+tce-load -i python3.11-pip
+tce-load -i autoconf automake m4
+tce-load -i meson
 
-PYTHON=`cat /opt/python`
-EXTNAM=$PYTHON-$NAM
+PYNAM=numpy
+NAM=numpy
+
+#WRKDIR=numpy-1.18.1
+#SRCNAM=$WRKDIR.tar.gz
+PYTHON=python`cat /opt/python`
+EXTNAM=$PYTHON-$PYNAM
 TMPDIR=/tmp/$PYTHON-$NAM
 PYTDIR=/usr/local/lib/$PYTHON/site-packages
+
+#wget -c https://github.com/numpy/numpy/releases/download/v1.18.1/numpy-1.18.1.tar.gz
+#wget -c https://github.com/numpy/numpy/releases/download/v1.12.0rc2/numpy-1.12.0rc2.tar.gz
 
 ######################################################
 # Prepare extension creation                         #
 ######################################################
 
-INITIALDIR=$PWD
-
 # Remove dirs and files left from previous creation
 
-#sudo pip3.6 uninstall Flask
+INITIALDIR=$PWD
+
+#rm -r -f $PYTDIR/$EXTNAM*.egg
 
 # Create temporary directory
 
-mkdir -p $TMPDIR$PYTDIR
+mkdir -p $TMPDIR/$PYTDIR
 
 ######################################################
 # Compile extension                                  #
 ######################################################
 
-# Install in place
+sudo pip install $PYNAM
 
-sudo pip3.6 install $PYNAM
-
-# Move files to tmp dir
-
-cp -rf $PYTDIR/$PYNAM-*-info $PYTDIR/$NAM $PYTDIR/$NAM*so $TMPDIR$PYTDIR
+cp -rf $PYTDIR/$PYNAM-*-info $PYTDIR/$NAM $PYTDIR/$NAM*py $TMPDIR$PYTDIR
 
 # Delete *.pyc files
 
@@ -72,10 +78,8 @@ mv -f ../$EXTNAM.tcz .
 md5sum $EXTNAM.tcz > $EXTNAM.tcz.md5.txt
 
 # copy extension files
-cp $EXTNAM.tcz* /mnt/mmcblk0p2/tce/optional
+sudo cp -v $EXTNAM.tcz* /mnt/mmcblk0p2/tce/optional
 
 # Cleanup temp directory
 
 rm -rf *
-
-cd $INITIALDIR

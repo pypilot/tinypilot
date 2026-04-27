@@ -1,19 +1,27 @@
 #!/bin/sh
 #
 ######################################################
-# Build script                                       #
+# Build script for RPI                               #
 #                                                    #
 # See .info for details                              #
+#                                                    #
+# February 13, 2013                                  #
 ######################################################
 
 ######################################################
 # Configure extension creation parameters            #
 ######################################################
 
-SRCNAM=lapack-3.1.1.tgz
-WRKDIR=lapack-3.1.1
-EXTNAM=lapack
-TMPDIR=/tmp/lapack
+tce-load -i python3.11-pip
+tce-load -i cmake autoconf automake m4
+
+PYNAM=odrpack
+NAM=odrpack
+
+PYTHON=python`cat /opt/python`
+EXTNAM=$PYTHON-$PYNAM
+TMPDIR=/tmp/$PYTHON-$NAM
+PYTDIR=/usr/local/lib/$PYTHON/site-packages
 
 ######################################################
 # Prepare extension creation                         #
@@ -21,50 +29,38 @@ TMPDIR=/tmp/lapack
 
 # Remove dirs and files left from previous creation
 
-rm -r -f $WRKDIR
+INITIALDIR=$PWD
 
-rm -r -f $TMPDIR
+#rm -r -f $PYTDIR/$EXTNAM*.egg
 
 # Create temporary directory
 
-mkdir -p $TMPDIR
+mkdir -p $TMPDIR/$PYTDIR
 
 ######################################################
 # Compile extension                                  #
 ######################################################
 
-INITIALDIR=$PWD
+wget https://github.com/HugoMVale/odrpack-python/archive/refs/tags/v0.5.0.tar.gz
+tar xf v0.5.0.tar.gz
+cd odrpack-python-0.5.0/
 
-# Export variables needed for compilation
+# this is why have to pull code to modify for gfortran 10 to build
+find . -type f -name "*.f" -exec sed -i 's/\bPURE\b //Ig' {} +
+sudo -H pip install .
 
-tar -xf $SRCNAM
+cp -rf $PYTDIR/$PYNAM-*-info $PYTDIR/$NAM $PYTDIR/$NAM*py $TMPDIR$PYTDIR
 
-# Configure it
+# Delete *.pyc files
 
-cd $WRKDIR
-cp INSTALL/make.inc.gfortran make.inc
-
-# Compile
-
-make
-
-# Install in base temp dir
-
-mkdir -p $TMPDIR/usr/lib
-cp lapack*.a $TMPDIR/usr/lib/liblapack.a
-
-# Delete compilation work directory
-
-cd ..
-rm -r -f $WRKDIR
+find $TMPDIR/ -name *.pyc | xargs rm -r
 
 # Adjust directory access rigths
 
 find $TMPDIR/ -type d | xargs chmod -v 755;
 
-# Strip executables
-
 find $TMPDIR | xargs file | grep ELF | cut -f 1 -d : | xargs strip --strip-unneeded
+
 
 ###################################################
 # Create base extension in temp dir               #
@@ -75,12 +71,15 @@ cd ..
 mksquashfs $TMPDIR $EXTNAM.tcz
 cd $TMPDIR
 find usr -not -type d > $EXTNAM.tcz.list
-mv ../$EXTNAM.tcz .
+mv -f ../$EXTNAM.tcz .
 
 # Create md5 file
 
 md5sum $EXTNAM.tcz > $EXTNAM.tcz.md5.txt
 
-cp -fv $EXTNAM.tcz /mnt/mmcblk0p2/tce/optional
+# copy extension files
+sudo cp -v $EXTNAM.tcz* /mnt/mmcblk0p2/tce/optional
 
-cd $INITIALDIR
+# Cleanup temp directory
+
+rm -rf *

@@ -5,17 +5,23 @@
 #                                                    #
 # See .info for details                              #
 #                                                    #
+# February 13, 2013                                  #
 ######################################################
 
 ######################################################
 # Configure extension creation parameters            #
 ######################################################
 
-PYNAM=greenlet
-NAM=greenlet
+tce-load -i python3.11-pip
 
-PYTHON=`cat /opt/python`
-EXTNAM=$PYTHON-$NAM
+PYTHONVERSION=`cat /opt/python`
+PYTHON=python$PYTHONVERSION
+
+PYNAM=spidev
+NAM=spidev
+
+PYTHON=python`cat /opt/python`
+EXTNAM=$PYTHON-$PYNAM
 TMPDIR=/tmp/$PYTHON-$NAM
 PYTDIR=/usr/local/lib/$PYTHON/site-packages
 
@@ -23,27 +29,23 @@ PYTDIR=/usr/local/lib/$PYTHON/site-packages
 # Prepare extension creation                         #
 ######################################################
 
-INITIALDIR=$PWD
-
 # Remove dirs and files left from previous creation
 
-#sudo pip3.6 uninstall Flask
+INITIALDIR=$PWD
+
+#rm -r -f $PYTDIR/$EXTNAM*.egg
 
 # Create temporary directory
 
-mkdir -p $TMPDIR$PYTDIR
+mkdir -p $TMPDIR/$PYTDIR
 
 ######################################################
 # Compile extension                                  #
 ######################################################
 
-# Install in place
+sudo -H pip install $PYNAM
 
-sudo pip3.6 install $PYNAM
-
-# Move files to tmp dir
-
-cp -rf $PYTDIR/$PYNAM-*-info $PYTDIR/$NAM $PYTDIR/$NAM*so $TMPDIR$PYTDIR
+cp -rf $PYTDIR/$PYNAM-*-info $PYTDIR/$NAM $PYTDIR/$NAM*py $TMPDIR$PYTDIR
 
 # Delete *.pyc files
 
@@ -72,10 +74,8 @@ mv -f ../$EXTNAM.tcz .
 md5sum $EXTNAM.tcz > $EXTNAM.tcz.md5.txt
 
 # copy extension files
-cp $EXTNAM.tcz* /mnt/mmcblk0p2/tce/optional
+sudo cp -v $EXTNAM.tcz* /mnt/mmcblk0p2/tce/optional
 
 # Cleanup temp directory
 
 rm -rf *
-
-cd $INITIALDIR

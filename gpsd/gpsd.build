@@ -13,13 +13,13 @@ PYTHON=python`cat /opt/python`
 
 # Configure it
 
-WRKDIR=gpsd-3.20
+WRKDIR=gpsd-3.27.5
 SRCNAM=$WRKDIR.tar.xz
 EXTNAM=gpsd
 TMPDIR=/tmp
 PYTDIR=/usr/local/lib/$PYTHON/site-packages
 
-wget -c http://download-mirror.savannah.gnu.org/releases/gpsd/$SRCNAM
+#wget -c http://download-mirror.savannah.gnu.org/releases/gpsd/$SRCNAM
 
 ######################################################
 # Prepare extension creation                         #

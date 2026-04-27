@@ -1,0 +1,1 @@
+PYNAM=ujson NAM=ujson ./python-package.build

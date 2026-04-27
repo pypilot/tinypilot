@@ -5,19 +5,20 @@
 #                                                    #
 # See .info for details                              #
 #                                                    #
+# February 13, 2013                                  #
 ######################################################
 
 ######################################################
 # Configure extension creation parameters            #
 ######################################################
 
-PYNAM=ujson
-NAM=ujson-3.0.0
-##NAM=ultrajson-d185144
+SRCNAM=RTIMULib2.tar.gz
+WRKDIR=RTIMULib
 
-PYTHON=python`cat /opt/python`
-EXTNAM=$PYTHON-$PYNAM
-TMPDIR=/tmp/$PYTHON-$NAM
+PYTHONVERSION=`cat /opt/python`
+PYTHON=python$PYTHONVERSION
+EXTNAM=$PYTHON-RTIMULib
+TMPDIR=/tmp/$EXTNAM
 PYTDIR=/usr/local/lib/$PYTHON/site-packages
 
 ######################################################
@@ -27,40 +28,45 @@ PYTDIR=/usr/local/lib/$PYTHON/site-packages
 INITIALDIR=$PWD
 
 # Remove dirs and files left from previous creation
-if [ -e $PYTDIR/easy-install.pth ]; then
-	echo 'please remove the file:'
-	echo $PYTDIR/easy-install.pth
-fi
+
+#rm -r -f $PYTDIR/$WRKDIR*.egg
 
 # Create temporary directory
 
-mkdir -p $TMPDIR$PYTDIR
+mkdir -p $TMPDIR/$PYTDIR
 
 ######################################################
 # Compile extension                                  #
 ######################################################
 
-# Install in place
-tar zxvf $NAM*tar.gz
-cd $NAM*
+# Export variables needed for compilation
 
-sudo $PYTHON setup.py install
+export CFLAGS="-march=armv6zk -mtune=arm1176jzf-s -mfpu=vfp"
+export CXXFLAGS="-march=armv6zk -mtune=arm1176jzf-s -mfpu=vfp"
 
-# Move files to tmp dir
+# Unpack source in current directory
 
-mkdir -p $TMPDIR$PYTDIR
-cp -rf $PYTDIR/ujson*egg/ujson*so  $TMPDIR$PYTDIR
+git clone --depth 1 https://github.com/seandepagnier/RTIMULib2/
+#tar -xf $SRCNAM
+mv RTIMULib2 RTIMULib
 
-# Delete *.pyc files
+# Configure it
 
-find $TMPDIR/ -name *.pyc | xargs rm -r
+cd $WRKDIR/Linux/python
+
+# Build and Install
+
+$PYTHON setup.py bdist
+tar xvf dist/*tar.gz -C $TMPDIR
+
+# Delete compilation work directory
+
+cd ../../..
+rm -r -f $WRKDIR
 
 # Adjust directory access rigths
 
 find $TMPDIR/ -type d | xargs chmod -v 755;
-
-find $TMPDIR | xargs file | grep ELF | cut -f 1 -d : | xargs strip --strip-unneeded
-
 
 ###################################################
 # Create base extension in temp dir               #
@@ -68,17 +74,19 @@ find $TMPDIR | xargs file | grep ELF | cut -f 1 -d : | xargs strip --strip-unnee
 
 cd $TMPDIR
 cd ..
+
+find $TMPDIR | xargs file | grep ELF | cut -f 1 -d : | xargs strip --strip-unneeded
+
 mksquashfs $TMPDIR $EXTNAM.tcz
 cd $TMPDIR
 find usr -not -type d > $EXTNAM.tcz.list
-mv -f ../$EXTNAM.tcz .
+mv ../$EXTNAM.tcz .
 
 # Create md5 file
 
 md5sum $EXTNAM.tcz > $EXTNAM.tcz.md5.txt
 
-# copy extension files
-cp $EXTNAM.tcz* /mnt/mmcblk0p2/tce/optional
+sudo cp -fv $EXTNAM.tcz* /mnt/mmcblk0p2/tce/optional
 
 # Cleanup temp directory
 

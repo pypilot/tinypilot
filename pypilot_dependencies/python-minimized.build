@@ -1,0 +1,63 @@
+# minimize the size of the python package
+
+PYTHON=python`cat /opt/python`
+EXTNAM=$PYTHON-minimized
+TMPDIR=/tmp/$EXTNAM
+PYTDIR=/usr/local/lib/$PYTHON
+
+INITIALDIR=$PWD
+
+cp -r /tmp/tcloop/$PYTHON $TMPDIR
+
+cd $TMPDIR/$PYTDIR
+cd config-*-arm-linux-gnueabihf/
+strip *.a
+rm -f Makefile install-sh Setup* config.c*
+
+cd $TMPDIR/$PYTDIR
+#rm -rf email
+rm -rf distutils
+rm -rf ensurepip
+rm -rf idlelib
+#rm -rf lib-dynload
+rm -rf lib2to3
+rm -rf pydoc_data
+rm -rf sqlite3
+rm -rf wsgiref
+rm -rf tkinter
+rm -rf turtledemo
+rm -rf unittest
+rm -rf xml
+rm -rf xmlrps
+
+cp -rv $PYTDIR/__pycache__ .
+cp -rv $PYTDIR/asyncio/__pycache__ asyncio
+cp -rv $PYTDIR/urllib/__pycache__ urllib
+cp -rv $PYTDIR/re/__pycache__ re
+cp -rv $PYTDIR/multiprocessing/__pycache__ multprocessing
+cp -rv $PYTDIR/logging/__pycache__ logging
+cp -rv $PYTDIR/json/__pycache__ json
+cp -rv $PYTDIR/importlib/__pycache__ importlib
+cp -rv $PYTDIR/encodings/__pycache__ encodings
+cp -rv $PYTDIR/collectons/__pycache__ collections
+cp -rv $PYTDIR/ctypes/__pycache__ ctypes
+cp -rv $PYTDIR/curses/__pycache__ curses
+cp -rv $PYTDIR/http/__pycache__ http
+cp -rv $PYTDIR/zoneinfo/__pycache__ zoneinfo
+
+cd $TMPDIR
+cd ..
+
+mksquashfs $TMPDIR $EXTNAM.tcz
+cd $TMPDIR
+find usr -not -type d > $EXTNAM.tcz.list
+mv -f ../$EXTNAM.tcz .
+
+# Create md5 file
+
+md5sum $EXTNAM.tcz > $EXTNAM.tcz.md5.txt
+
+# copy extension files
+sudo cp -v $EXTNAM.tcz* /mnt/mmcblk0p2/tce/optional
+
+cd $INITIALDIR

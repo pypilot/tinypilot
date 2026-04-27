@@ -1,39 +1,37 @@
 #!/bin/sh
 #
 ######################################################
-# Build script for RPI                               #
+# Build script                                       #
 #                                                    #
 # See .info for details                              #
-#                                                    #
-# February 13, 2013                                  #
 ######################################################
 
 ######################################################
 # Configure extension creation parameters            #
 ######################################################
 
-SRCNAM=RTIMULib2.tar.gz
-WRKDIR=RTIMULib
+INITIALDIR=$PWD
 
-PYTHONVERSION=`cat /opt/python`
-PYTHON=python$PYTHONVERSION
-EXTNAM=$PYTHON-RTIMULib
-TMPDIR=/tmp/$EXTNAM
-PYTDIR=/usr/local/lib/$PYTHON/site-packages
+wget https://cytranet-dal.dl.sourceforge.net/project/swig/swig/swig-4.4.1/swig-4.4.1.tar.gz
+
+SRCNAM=swig-4.4.1.tar.gz
+WRKDIR=swig-4.4.1
+EXTNAM=swig
+TMPDIR=/tmp/swig
 
 ######################################################
 # Prepare extension creation                         #
 ######################################################
 
-INITIALDIR=$PWD
-
 # Remove dirs and files left from previous creation
 
-#rm -r -f $PYTDIR/$WRKDIR*.egg
+rm -r -f $WRKDIR
 
-# Create temporary directory
+rm -r -f $TMPDIR
 
-mkdir -p $TMPDIR/$PYTDIR
+# Crete temporary directory
+
+mkdir -p $TMPDIR
 
 ######################################################
 # Compile extension                                  #
@@ -41,31 +39,41 @@ mkdir -p $TMPDIR/$PYTDIR
 
 # Export variables needed for compilation
 
-export CFLAGS="-march=armv6zk -mtune=arm1176jzf-s -mfpu=vfp"
-export CXXFLAGS="-march=armv6zk -mtune=arm1176jzf-s -mfpu=vfp"
+export CFLAGS="-O2 -pipe -march=armv6zk -mtune=arm1176jzf-s -mfpu=vfp"
+export CXXFLAGS="-O2 -pipe -fexceptions -fno-rtti -march=armv6zk -mtune=arm1176jzf-s -mfpu=vfp"
 
 # Unpack source in current directory
 
 tar -xf $SRCNAM
-mv RTIMULib2 RTIMULib
 
 # Configure it
 
-cd $WRKDIR/Linux/python
+cd $WRKDIR
+./configure \
+--prefix=/usr/local \
+--enable-static \
+--enable-shared
 
-# Build and Install
+# Compile
 
-$PYTHON setup.py bdist
-tar xvf dist/*tar.gz -C $TMPDIR
+make
+
+# Install in base temp dir
+
+make install DESTDIR=$TMPDIR
 
 # Delete compilation work directory
 
-cd ../../..
+cd ..
 rm -r -f $WRKDIR
 
 # Adjust directory access rigths
 
 find $TMPDIR/ -type d | xargs chmod -v 755;
+
+# Strip executables
+
+find $TMPDIR | xargs file | grep ELF | cut -f 1 -d : | xargs strip --strip-unneeded
 
 ###################################################
 # Create base extension in temp dir               #
@@ -81,11 +89,11 @@ mv ../$EXTNAM.tcz .
 # Create md5 file
 
 md5sum $EXTNAM.tcz > $EXTNAM.tcz.md5.txt
-
-sudo cp -fv $EXTNAM.tcz* /mnt/mmcblk0p2/tce/optional
+# copy extension files
+sudo cp -v $EXTNAM.tcz* /mnt/mmcblk0p2/tce/optional
 
 # Cleanup temp directory
 
-rm -rf *
+rm -r -f usr
 
 cd $INITIALDIR

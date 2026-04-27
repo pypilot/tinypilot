@@ -10,8 +10,8 @@
 # Configure extension creation parameters            #
 ######################################################
 
-SRCNAM=runit-2.1.2.tar.gz
-WRKDIR=admin
+SRCNAM=runit-2.3.1.tar.gz
+WRKDIR=runit-2.3.1
 EXTNAM=runit
 TMPDIR=/tmp/runit
 
@@ -48,14 +48,14 @@ tar -xf $SRCNAM
 
 # Configure it
 
-cd $WRKDIR/runit-2.1.2/src
+cd $WRKDIR/runit-2.3.1/src
 
 # Compile
 
 make
 
 cp -v sv runsvdir runsv svlogd chpst $DESTDIR
-cd ../../..
+cd ../..
 
 rm -r -f $WRKDIR
 

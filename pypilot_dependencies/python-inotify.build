@@ -1,0 +1,1 @@
+PYNAM=inotify NAM=inotify ./python-package.build
