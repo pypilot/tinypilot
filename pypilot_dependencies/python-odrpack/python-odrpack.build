@@ -13,7 +13,7 @@
 ######################################################
 
 tce-load -i python3.11-pip
-tce-load -i cmake autoconf automake m4
+tce-load -i cmake autoconf automake m4 meson
 
 PYNAM=odrpack
 NAM=odrpack
@@ -41,13 +41,13 @@ mkdir -p $TMPDIR/$PYTDIR
 # Compile extension                                  #
 ######################################################
 
-wget https://github.com/HugoMVale/odrpack-python/archive/refs/tags/v0.5.0.tar.gz
+wget -c https://github.com/HugoMVale/odrpack-python/archive/refs/tags/v0.5.0.tar.gz
 tar xf v0.5.0.tar.gz
 cd odrpack-python-0.5.0/
 
 # this is why have to pull code to modify for gfortran 10 to build
 find . -type f -name "*.f" -exec sed -i 's/\bPURE\b //Ig' {} +
-sudo -H pip install .
+FFLAGS="-O0 -g -fcheck=all -fbacktrace -finit-real=snan -finit-integer=-999999 -fno-automatic" CFLAGS="-O0 -g" sudo -H pip install . -v --no-build-isolation --force-reinstall --no-cache-dir
 
 cp -rf $PYTDIR/$PYNAM-*-info $PYTDIR/$NAM $PYTDIR/$NAM*py $TMPDIR$PYTDIR
 
